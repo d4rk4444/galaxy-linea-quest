@@ -18,10 +18,6 @@ export const dataMintHOP = async(rpc, addressTo) => {
     return { encodeABI, estimateGas, valueMint };
 }
 
-await dataMintHOP(info.rpcGoerli, '0x60365500fc2b09d8ab6AFf7dd444d0dA0Fe8059C').then((res) => {
-    console.log(res);
-});
-
 export const dataMintDAI = async(rpc, addressTo) => {
     const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
     const contract = new w3.eth.Contract(abiToken, info.DAIGoerli);
@@ -37,7 +33,3 @@ export const dataMintDAI = async(rpc, addressTo) => {
     const estimateGas = await data.estimateGas({ from: addressTo, value: valueMint });
     return { encodeABI, estimateGas, valueMint };
 }
-
-await dataMintDAI(info.rpcGoerli, '0x60365500fc2b09d8ab6AFf7dd444d0dA0Fe8059C').then((res) => {
-    console.log(res);
-});

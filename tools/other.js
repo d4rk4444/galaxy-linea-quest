@@ -8,9 +8,14 @@ export const info = {
     explorerLinea: 'https://explorer.goerli.linea.build/tx/',
     bridgeHop: '0xd9e10C6b1bd26dE4E2749ce8aFe8Dd64294BcBF5',
     relayerHop: '0x81682250D4566B2986A2B33e23e7c52D401B7aB7',
-    routerHop: '0x7191061D5d4C60f598214cC6913502184BAddf18',
+    bridgeHopDAI: '0xAa1603822b43e592e33b58d34B4423E1bcD8b4dC',
+    bridgeHopHOP: '0x9051Dc48d27dAb53DbAB9E844f8E48c469603938',
+    bridgeHopUSDC: '0x889CD829cE211c92b31fDFE1d75299482839ea2b',
+    relayerHopToken: 'B47dE784aB8702eC35c5eAb225D6f6cE476DdD28',
     DAIGoerli: '0xb93cba7013f4557cDFB590fD152d24Ef4063485f',
     HOPGoerli: '0x38aF6928BF1Fd6B3c768752e716C49eb8206e20c',
+    USDCGoerli: '0x07865c6E87B9F70255377e024ace6630C1Eaa37F',
+    routerUniswap: '0x4648a43B2C14Da09FdF82B161150d3F634f40491',
     approveAmount: '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
 }
 
