@@ -66,27 +66,25 @@ const bridgeETHToLinea = async(privateKey) => {
     let isReady;
     while(!isReady) {
         try {
-            await getETHAmount(info.rpcGoerli, address).then(async(amountETH) => {
-                await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
-                    if (Number(gasPrice) < 1) {
-                        gasPrice = '1.5';
-                    } 
-                    gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
-                    if (Number(gasPrice) <= needGasPrice) {
-                        /*const amountFee = parseInt(multiply(1000000, gasPrice * 10**9));
-                        amountETH = parseInt(multiply(subtract(amountETH, amountFee), random));*/
-                        const gasLimit = generateRandomAmount(700000, 1000000, 0);
-                        await dataBridgeETHtoLinea(info.rpcGoerli, amountETH, address).then(async(res) => {
-                            await sendGoerliTX(info.rpcGoerli, gasLimit, gasPrice, info.bridgeHop, res.valueTX, res.encodeABI, privateKey);
-                            console.log(chalk.yellow(`Bridge ${amountETH / 10**18}ETH to Linea`));
-                            logger.log(`Bridge ${amountETH / 10**18}ETH to Linea`);
-                            isReady = true;
-                        });
-                    } else if (Number(gasPrice) > needGasPrice) {
-                        console.log(`GasPrice NOW = ${gasPrice} > NEED ${needGasPrice}`);
-                        await timeout(5000);
-                    }
-                });
+            await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
+                if (Number(gasPrice) < 1) {
+                    gasPrice = '1.5';
+                } 
+                gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
+                if (Number(gasPrice) <= needGasPrice) {
+                    /*const amountFee = parseInt(multiply(1000000, gasPrice * 10**9));
+                    amountETH = parseInt(multiply(subtract(amountETH, amountFee), random));*/
+                    const gasLimit = generateRandomAmount(700000, 1000000, 0);
+                    await dataBridgeETHtoLinea(info.rpcGoerli, amountETH, address).then(async(res) => {
+                        await sendGoerliTX(info.rpcGoerli, gasLimit, gasPrice, info.bridgeHop, res.valueTX, res.encodeABI, privateKey);
+                        console.log(chalk.yellow(`Bridge ${amountETH / 10**18}ETH to Linea`));
+                        logger.log(`Bridge ${amountETH / 10**18}ETH to Linea`);
+                        isReady = true;
+                    });
+                } else if (Number(gasPrice) > needGasPrice) {
+                    console.log(`GasPrice NOW = ${gasPrice} > NEED ${needGasPrice}`);
+                    await timeout(5000);
+                }
             });
         } catch (err) {
             logger.log(err);
@@ -136,6 +134,8 @@ const bridgeTokenToLinea = async(addressToken, privateKey) => {
 
     isReady = false;
     while(!isReady) {
+        console.log(chalk.yellow(`Start bridge ${tokenName} to Linea`));
+        logger.log(`Start bridge ${tokenName} to Linea`);
         try {
             await getAmountToken(info.rpcGoerli, addressToken, address).then(async(amountToken) => {
                 amountToken = parseInt(amountToken * 0.1);
