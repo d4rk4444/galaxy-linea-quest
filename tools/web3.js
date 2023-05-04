@@ -67,6 +67,48 @@ export const dataSendToken = async (rpc, tokenAddress, toAddress, amount, fromAd
     return { encodeABI, estimateGas };
 }
 
+export const sendEVMTX = async(rpc, typeTx, gasLimit, toAddress, value, data, privateKey, maxFeeOrGasPrice, maxPriorityFee) => {
+    const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    const fromAddress = privateToAddress(privateKey);
+    let tx;
+    
+    if (typeTx == 0) {
+        tx = {
+            'from': fromAddress,
+            'gas': gasLimit,
+            'gasPrice': w3.utils.toWei(maxFeeOrGasPrice, 'Gwei'),
+            'chainId': await w3.eth.getChainId(),
+            'to': toAddress,
+            'nonce': await w3.eth.getTransactionCount(fromAddress),
+            'value': value,
+            'data': data
+        }
+    } else if (typeTx == 2) {
+        tx = {
+            'from': fromAddress,
+            'gas': gasLimit,
+            'maxFeePerGas': w3.utils.toWei(maxFeeOrGasPrice, 'Gwei'),
+            'maxPriorityFeePerGas': w3.utils.toWei(maxPriorityFee, 'Gwei'),
+            'chainId': await w3.eth.getChainId(),
+            'to': toAddress,
+            'nonce': await w3.eth.getTransactionCount(fromAddress),
+            'value': value,
+            'data': data
+        }
+    }
+
+    const signedTx = await w3.eth.accounts.signTransaction(tx, privateKey);
+    await w3.eth.sendSignedTransaction(signedTx.rawTransaction, async(error, hash) => {
+        if (!error) {
+            const chain = (Object.keys(info)[Object.values(info).findIndex(e => e == rpc)]).slice(3);
+            const explorer = info['explorer' + (Object.keys(info)[Object.values(info).findIndex(e => e == rpc)]).slice(3)];
+            console.log(`${chain} TX: ${explorer + hash}`);
+        } else {
+            console.log(`Error Tx: ${error}`);
+        }
+    });
+}
+
 export const sendGoerliTX = async(rpc, gasLimit, gasPrice, toAddress, value, data, privateKey) => {
     const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
     const fromAddress = privateToAddress(privateKey);

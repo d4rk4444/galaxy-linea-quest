@@ -2,11 +2,15 @@ import Web3 from 'web3';
 import fs from 'fs';
 
 export const info = {
+    rpcArbitrum: 'https://1rpc.io/arb',
     rpcGoerli: 'https://rpc.ankr.com/eth_goerli',
     rpcLinea: 'https://rpc.goerli.linea.build',
+    explorerArbitrum: 'https://arbiscan.io/tx/',
     explorerGoerli: 'https://goerli.etherscan.io/tx/',
     explorerLinea: 'https://explorer.goerli.linea.build/tx/',
     bridgeHop: '0xd9e10C6b1bd26dE4E2749ce8aFe8Dd64294BcBF5',
+    bridgeZetaChain: '0x7c125C1d515b8945841b3d5144a060115C58725F',
+    routerL0Arb: '0x0A9f824C05A74F577A536A8A0c673183a872Dff4',
     relayerHop: '0x81682250D4566B2986A2B33e23e7c52D401B7aB7',
     bridgeHopDAI: '0xAa1603822b43e592e33b58d34B4423E1bcD8b4dC',
     bridgeHopHOP: '0x9051Dc48d27dAb53DbAB9E844f8E48c469603938',

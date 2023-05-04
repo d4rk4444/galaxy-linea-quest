@@ -1,6 +1,6 @@
 {
   "name": "galaxy-linea-quest",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "",
   "main": "index.js",
   "type": "module",
@@ -14,6 +14,7 @@
     "chalk": "^5.2.0",
     "console-stamp": "^3.1.1",
     "dotenv": "^16.0.3",
+    "ethers": "^5.7.0",
     "fs": "^0.0.1-security",
     "mathjs": "^11.8.0",
     "readline-sync": "^1.4.10",

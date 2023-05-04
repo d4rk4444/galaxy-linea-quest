@@ -11,9 +11,10 @@ import { checkAllowance,
     getGasPrice,
     dataSendToken,
     sendGoerliTX,    
-    sendLineaTX} from './tools/web3.js';
+    sendLineaTX,
+    sendEVMTX} from './tools/web3.js';
 import { dataMintDAI, dataMintHOP } from './tools/mint.js';
-import { dataBridgeETHtoLinea, dataBridgeTokentoLinea } from './tools/bridge.js';
+import { dataBridgeETHtoGoerli, dataBridgeETHtoLinea, dataBridgeTokentoLinea, dataBridgeZetaChainBSC } from './tools/bridge.js';
 import { dataSwapETHToUSDC } from './tools/DEX.js';
 import { subtract, multiply, divide, add } from 'mathjs';
 import fs from 'fs';
@@ -29,6 +30,33 @@ consoleStamp(console, { format: ':date(HH:MM:ss)' });
 consoleStamp(logger, { format: ':date(yyyy/mm/dd HH:MM:ss)', stdout: output });
 
 const pauseTime = generateRandomAmount(process.env.TIMEOUT_ACTION_SEC_MIN * 1000, process.env.TIMEOUT_ACTION_SEC_MAX * 1000, 0);
+
+const bridgeETHToGoerli = async(privateKey) => {
+    const address = privateToAddress(privateKey);
+    const random = generateRandomAmount(process.env.PERCENT_ETH_BRIDGE_MIN / 100, process.env.PERCENT_ETH_BRIDGE_MAX / 100, 3);
+
+    let isReady;
+    while(!isReady) {
+        try {
+            await getETHAmount(info.rpcArbitrum, address).then(async(amountETH) => {
+                await getGasPrice(info.rpcArbitrum).then(async(gasPrice) => {
+                    const amountFee = multiply(3000000, gasPrice * 10**9);
+                    amountETH = parseInt(multiply(subtract(amountETH, amountFee), random));
+                    await dataBridgeETHtoGoerli(info.rpcArbitrum, amountETH, address).then(async(res) => {
+                        await sendEVMTX(info.rpcArbitrum, 2, res.estimateGas, info.routerL0Arb, res.valueTX, res.encodeABI, privateKey, gasPrice, gasPrice);
+                        console.log(chalk.yellow(`Bridge ${amountETH / 10**18}ETH to Goerli`));
+                        logger.log(`Bridge ${amountETH / 10**18}ETH to Goerli`);
+                        isReady = true;
+                    });
+                });
+            });
+        } catch (err) {
+            logger.log(err);
+            console.log(err.message);
+            return;
+        }
+    }
+}
 
 const bridgeETHToLinea = async(privateKey) => {
     const address = privateToAddress(privateKey);
@@ -117,10 +145,10 @@ const bridgeTokenToLinea = async(addressToken, privateKey) => {
                     if (Number(gasPrice) <= needGasPrice) {
                         const gasLimit = generateRandomAmount(700000, 1000000, 0);
                         await dataBridgeTokentoLinea(info.rpcGoerli, amountToken, address).then(async(res) => {
-                            console.log(res);
                             await sendGoerliTX(info.rpcGoerli, gasLimit, gasPrice, info['bridgeHop' + tokenName], res.valueTX, res.encodeABI, privateKey);
-                            console.log(chalk.yellow(`Bridge ${amountToken / 10**18}${tokenName} to Linea`));
-                            logger.log(`Bridge ${amountToken / 10**18}${tokenName} to Linea`);
+                            const decimalsTkn = addressToken == info.USDCGoerli ? 6 : 18;
+                            console.log(chalk.yellow(`Bridge ${amountToken / 10**decimalsTkn}${tokenName} to Linea`));
+                            logger.log(`Bridge ${amountToken / 10**decimalsTkn}${tokenName} to Linea`);
                             isReady = true;
                         });
                     } else if (Number(gasPrice) > needGasPrice) {
@@ -128,6 +156,72 @@ const bridgeTokenToLinea = async(addressToken, privateKey) => {
                         await timeout(5000);
                     }
                 });
+            });
+        } catch (err) {
+            logger.log(err);
+            console.log(err.message);
+            return;
+        }
+    }
+}
+
+const bridgeETHToBSC = async(privateKey) => {
+    const address = privateToAddress(privateKey);
+    const needGasPrice = process.env.GAS_PRICE_BRIDGE;
+
+    let isReady;
+    while(!isReady) {
+        try {
+            const amountETH = 0.03 * 10**18;
+            await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
+                if (Number(gasPrice) < 1) {
+                    gasPrice = '1.5';
+                } 
+                gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
+                if (Number(gasPrice) <= needGasPrice) {
+                    await dataBridgeZetaChainBSC(info.rpcGoerli, amountETH, address).then(async(res) => {
+                        await sendGoerliTX(info.rpcGoerli, parseInt(res.estimateGas*1.5), gasPrice, info.bridgeZetaChain, amountETH, res.encodeABI, privateKey);
+                        console.log(chalk.yellow(`Bridge ${amountETH / 10**18}ETH to BSC`));
+                        logger.log(`Bridge ${amountETH / 10**18}ETH to BSC`);
+                        isReady = true;
+                    });
+                } else if (Number(gasPrice) > needGasPrice) {
+                    console.log(`GasPrice NOW = ${gasPrice} > NEED ${needGasPrice}`);
+                    await timeout(5000);
+                }
+            });
+        } catch (err) {
+            logger.log(err);
+            console.log(err.message);
+            return;
+        }
+    }
+}
+
+const bridgeETHToMATIC = async(privateKey) => {
+    const address = privateToAddress(privateKey);
+    const needGasPrice = process.env.GAS_PRICE_BRIDGE;
+
+    let isReady;
+    while(!isReady) {
+        try {
+            const amountETH = 0.01 * 10**18;
+            await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
+                if (Number(gasPrice) < 1) {
+                    gasPrice = '1.5';
+                } 
+                gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
+                if (Number(gasPrice) <= needGasPrice) {
+                    await dataBridgeZetaChainBSC(info.rpcGoerli, amountETH, address).then(async(res) => {
+                        await sendGoerliTX(info.rpcGoerli, parseInt(res.estimateGas*1.5), gasPrice, info.bridgeZetaChain, amountETH, res.encodeABI, privateKey);
+                        console.log(chalk.yellow(`Bridge ${amountETH / 10**18}ETH to Polygon`));
+                        logger.log(`Bridge ${amountETH / 10**18}ETH to Polygon`);
+                        isReady = true;
+                    });
+                } else if (Number(gasPrice) > needGasPrice) {
+                    console.log(`GasPrice NOW = ${gasPrice} > NEED ${needGasPrice}`);
+                    await timeout(5000);
+                }
             });
         } catch (err) {
             logger.log(err);
@@ -224,15 +318,17 @@ const swapETHToUSDC = async(privateKey) => {
     }
 }
 
-console.log();
 
 (async() => {
     const wallet = parseFile('private.txt');
     const mainStage = [
+        'Bridge ETH Arbitrum -> Goerli',
         'Bridge ETH to Linea',
         'Bridge DAI to Linea',
         'Bridge HOP to Linea',
         'Bridge USDC to Linea',
+        'Bridge ETH to BSC zetaChain',
+        'Bridge ETH to MATIC zetaChain',
         'Mint DAI',
         'Mint HOP',
         'Swap ETH to USDC'
@@ -251,18 +347,24 @@ console.log();
         } catch (err) { throw new Error('Error: Add Private Keys!') };
 
         if (index == 0) { //BRIDGE STAGE
-            await bridgeETHToLinea(wallet[i]);
+            await bridgeETHToGoerli(wallet[i]);
         } else if (index == 1) {
-            await bridgeTokenToLinea(info.DAIGoerli, wallet[i]);
+            await bridgeETHToLinea(wallet[i]);
         } else if (index == 2) {
-            await bridgeTokenToLinea(info.HOPGoerli, wallet[i]);
+            await bridgeTokenToLinea(info.DAIGoerli, wallet[i]);
         } else if (index == 3) {
-            await bridgeTokenToLinea(info.USDCGoerli, wallet[i]);
+            await bridgeTokenToLinea(info.HOPGoerli, wallet[i]);
         } else if (index == 4) {
-            await mintDAI(wallet[i]);
+            await bridgeTokenToLinea(info.USDCGoerli, wallet[i]);
         } else if (index == 5) {
-            await mintHOP(wallet[i]);
+            await bridgeETHToBSC(wallet[i]);
         } else if (index == 6) {
+            await bridgeETHToMATIC(wallet[i]);
+        } else if (index == 7) {
+            await mintDAI(wallet[i]);
+        } else if (index == 8) {
+            await mintHOP(wallet[i]);
+        } else if (index == 9) {
             await swapETHToUSDC(wallet[i]);
         }
 

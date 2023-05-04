@@ -105,3 +105,49 @@ export const uniAbi = [
         "type":"function"
     }
 ]
+
+export const leyerAbi = [
+    {
+        "type":"function",
+        "name":"quoteLayerZeroFee",
+        "inputs": [
+            {"name":"_dstChainId","type":"uint16"},
+            {"name":"_functionType","type":"uint8"},
+            {"name":"_toAddress","type":"bytes"},
+            {"name":"_transferAndCallPayload","type":"bytes"},
+            {
+                "name":"_lzTxParams",
+                "type":"tuple",
+                "components": [{
+                    "name": "dstGasForCall",
+                    "type": "uint256"
+                },
+                {
+                    "name": "dstNativeAmount",
+                    "type": "uint256"
+                },
+                {
+                    "name": "dstNativeAddr",
+                    "type": "bytes"
+                }]
+            }
+        ],
+        "outputs": [
+            {"name":"nativeFee","type":"uint256"},
+            {"name":"zroFee","type":"uint256"}
+        ]
+    },
+    {
+        "type":"function",
+        "name":"swapAndBridge",
+        "inputs": [
+            {"name":"amountIn","type":"uint256"},
+            {"name":"amountOutMin","type":"uint256"},
+            {"name":"dstChainId","type":"uint16"},
+            {"name":"to","type":"address"},
+            {"name":"refundAddress","type":"address"},
+            {"name":"zroPaymentAddress","type":"address"},
+            {"name":"adapterParams","type":"bytes"},
+        ],
+    },
+]
