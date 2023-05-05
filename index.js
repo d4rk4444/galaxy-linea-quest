@@ -262,7 +262,7 @@ const bridgeETHToBSC = async(privateKey) => {
     let isReady;
     while(!isReady) {
         try {
-            const amountETH = 0.035 * 10**18;
+            const amountETH = 0.15 * 10**18;
             await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
                 if (Number(gasPrice) < 1) {
                     gasPrice = '1.5';
