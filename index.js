@@ -353,7 +353,7 @@ const bridgeBUSDToLinea = async(privateKey) => {
             await getGasPrice(info.rpcBSC).then(async(gasPrice) => {
                 gasPrice = parseFloat((gasPrice * 1.1)).toFixed(4).toString(); //GET AMO
                 await getAmountToken(info.rpcBSC, info.BUSDCeler, address).then(async(amountBUSD) => {
-                    amountBUSD = parseInt(amountBUSD * 0.1);
+                    amountBUSD = add(parseInt(amountBUSD * 0.1), 10 * 10**18);
                     await dataBridgeBUSDToLinea(info.rpcBSC, amountBUSD, address).then(async(res) => {
                         await sendEVMTX(info.rpcBSC, 0, parseInt(res.estimateGas*1.5), info.bridgeCeler, null, res.encodeABI, privateKey, gasPrice);
                         console.log(chalk.yellow(`Bridge ${amountBUSD / 10**18}BUSD to Celer`));
