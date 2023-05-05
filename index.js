@@ -113,6 +113,39 @@ const mintHOP = async(privateKey) => {
     }
 }
 
+const swapETHToUSDC = async(privateKey) => {
+    const address = privateToAddress(privateKey);
+    const needGasPrice = process.env.GAS_PRICE_BRIDGE;
+
+    let isReady;
+    while(!isReady) {
+        try {
+            await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
+                if (Number(gasPrice) < 1) {
+                    gasPrice = '1.5';
+                } 
+                gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
+                if (Number(gasPrice) <= needGasPrice) {
+                    //const gasLimit = generateRandomAmount(700000, 1000000, 0);
+                    await dataSwapETHToUSDC(info.rpcGoerli, address).then(async(res) => {
+                        await sendGoerliTX(info.rpcGoerli, res.estimateGas, gasPrice, info.routerUniswap, res.valueTX, res.encodeABI, privateKey);
+                        console.log(chalk.yellow(`Swap ${res.valueTX / 10**18}ETH to USDC`));
+                        logger.log(`Swap ${res.valueTX / 10**18}ETH to USDC`);
+                        isReady = true;
+                    });
+                } else if (Number(gasPrice) > needGasPrice) {
+                    console.log(`GasPrice NOW = ${gasPrice} > NEED ${needGasPrice}`);
+                    await timeout(5000);
+                }
+            });
+        } catch (err) {
+            logger.log(err);
+            console.log(err.message);
+            return;
+        }
+    }
+}
+
 const bridgeETHToLinea = async(privateKey) => {
     const address = privateToAddress(privateKey);
     const needGasPrice = process.env.GAS_PRICE_BRIDGE;
@@ -168,7 +201,7 @@ const bridgeTokenToLinea = async(addressToken, privateKey) => {
                         await dataApprove(info.rpcGoerli, addressToken, info['bridgeHop' + tokenName], address).then(async(res1) => {
                             await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
                                 if (Number(gasPrice) < 1) { gasPrice = '1.5'; } 
-                                gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
+                                gasPrice = parseFloat((gasPrice * 1.5)).toFixed(4).toString();
                                 await sendGoerliTX(info.rpcGoerli, res1.estimateGas, gasPrice, addressToken, null, res1.encodeABI, privateKey);
                             });
                         });
@@ -261,7 +294,7 @@ const bridgeBNBToLinea = async(privateKey) => {
         try {
             const amountETH = 0.001 * 10**18;
             await getGasPrice(info.rpcBSC).then(async(gasPrice) => {
-                gasPrice = parseFloat((gasPrice * 1.1)).toFixed(4).toString();
+                gasPrice = parseFloat((gasPrice * 2)).toFixed(4).toString();
                 await dataBridgeBNBToLinea(info.rpcBSC, amountETH, address).then(async(res) => {
                     await sendEVMTX(info.rpcBSC, 0, parseInt(res.estimateGas*1.5), info.bridgeCeler, amountETH, res.encodeABI, privateKey, gasPrice);
                     console.log(chalk.yellow(`Bridge ${amountETH / 10**18}BNB to Celer`));
@@ -293,7 +326,7 @@ const bridgeBUSDToLinea = async(privateKey) => {
                         logger.log(`Start Approve BUSD for Celer Bridge`);
                         await dataApprove(info.rpcBSC, info.BUSDCeler, info.bridgeCeler, address).then(async(res1) => {
                             await getGasPrice(info.rpcBSC).then(async(gasPrice) => {
-                                gasPrice = parseFloat((gasPrice * 1.1)).toFixed(4).toString();
+                                gasPrice = parseFloat((gasPrice * 2)).toFixed(4).toString();
                                 await sendEVMTX(info.rpcBSC, 0, res1.estimateGas, info.BUSDCeler, null, res1.encodeABI, privateKey, gasPrice);
                             });
                         });
@@ -349,39 +382,6 @@ const mintBUSD = async(privateKey) => {
                     logger.log(`Mint BUSD`);
                     isReady = true;
                 });
-            });
-        } catch (err) {
-            logger.log(err);
-            console.log(err.message);
-            return;
-        }
-    }
-}
-
-const swapETHToUSDC = async(privateKey) => {
-    const address = privateToAddress(privateKey);
-    const needGasPrice = process.env.GAS_PRICE_BRIDGE;
-
-    let isReady;
-    while(!isReady) {
-        try {
-            await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
-                if (Number(gasPrice) < 1) {
-                    gasPrice = '1.5';
-                } 
-                gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
-                if (Number(gasPrice) <= needGasPrice) {
-                    //const gasLimit = generateRandomAmount(700000, 1000000, 0);
-                    await dataSwapETHToUSDC(info.rpcGoerli, address).then(async(res) => {
-                        await sendGoerliTX(info.rpcGoerli, res.estimateGas, gasPrice, info.routerUniswap, res.valueTX, res.encodeABI, privateKey);
-                        console.log(chalk.yellow(`Swap ${res.valueTX / 10**18}ETH to USDC`));
-                        logger.log(`Swap ${res.valueTX / 10**18}ETH to USDC`);
-                        isReady = true;
-                    });
-                } else if (Number(gasPrice) > needGasPrice) {
-                    console.log(`GasPrice NOW = ${gasPrice} > NEED ${needGasPrice}`);
-                    await timeout(5000);
-                }
             });
         } catch (err) {
             logger.log(err);
