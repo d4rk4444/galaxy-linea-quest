@@ -3,8 +3,8 @@ import fs from 'fs';
 
 export const info = {
     rpcArbitrum: 'https://1rpc.io/arb',
-    rpcGoerli: 'https://rpc.ankr.com/eth_goerli',
-    rpcLinea: 'https://rpc.goerli.linea.build',
+    rpcGoerli: 'https://goerli.blockpi.network/v1/rpc/public',
+    rpcLinea: '',
     rpcBSC: 'https://data-seed-prebsc-2-s2.binance.org:8545',
     rpcPolygon: 'https://endpoints.omniatech.io/v1/matic/mumbai/public',
     explorerArbitrum: 'https://arbiscan.io/tx/',
@@ -28,6 +28,11 @@ export const info = {
     BUSDCeler: '0xeB3Eb991D39Dac92616da64b7c6D5af5cCFf1627',
     routerUniswap: '0x4648a43B2C14Da09FdF82B161150d3F634f40491',
     routerUniswapBSC: '0x9a489505a00cE272eAa5e07Dba6491314CaE3796',
+    USDCLinea: '0xf56dc6695cF1f5c364eDEbC7Dc7077ac9B586068',
+    DAILinea: '0x8741Ba6225A6BF91f9D73531A98A89807857a2B3',
+    HOPLinea: '0x6F03052743CD99ce1b29265E377e320CD24Eb632',
+    BNBLinea: '0x5471ea8f739dd37E9B81Be9c5c77754D8AA953E4',
+    BUSDLinea: '0x7d43AABC515C356145049227CeE54B608342c0ad',
     approveAmount: '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
 }
 

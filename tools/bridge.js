@@ -49,9 +49,9 @@ export const dataBridgeETHtoLinea = async(rpc, amount, addressTo) => {
     return { encodeABI, estimateGas, valueTX };
 }
 
-export const dataBridgeTokentoLinea = async(rpc, amount, addressTo) => {
+export const dataBridgeTokentoLinea = async(rpc, addressHopRouter, amount, addressTo) => {
     const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
-    const contract = new w3.eth.Contract(hopAbi, info.bridgeHopHOP);
+    const contract = new w3.eth.Contract(hopAbi, addressHopRouter);
 
     const amountOutMin = parseInt(multiply(amount, 0.99));
     const relayerFee = '0';
