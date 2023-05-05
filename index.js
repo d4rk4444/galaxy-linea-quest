@@ -13,15 +13,16 @@ import { checkAllowance,
     sendGoerliTX,    
     sendLineaTX,
     sendEVMTX} from './tools/web3.js';
-import { dataMintDAI, dataMintHOP } from './tools/mint.js';
+import { dataMintBUSD, dataMintDAI, dataMintHOP } from './tools/mint.js';
 import { dataBridgeETHtoGoerli, dataBridgeETHtoLinea, dataBridgeTokentoLinea, dataBridgeZetaChainBSC } from './tools/bridge.js';
-import { dataSwapETHToUSDC } from './tools/DEX.js';
+import { dataSwapBNBToBUSD, dataSwapETHToUSDC } from './tools/DEX.js';
 import { subtract, multiply, divide, add } from 'mathjs';
 import fs from 'fs';
 import readline from 'readline-sync';
 import consoleStamp from 'console-stamp';
 import chalk from 'chalk';
 import * as dotenv from 'dotenv';
+import { dataBridgeBNBToLinea, dataBridgeBUSDToLinea } from './tools/celer.js';
 dotenv.config();
 
 const output = fs.createWriteStream(`history.log`, { flags: 'a' });
@@ -48,6 +49,60 @@ const bridgeETHToGoerli = async(privateKey) => {
                         logger.log(`Bridge ${amountETH / 10**18}ETH to Goerli`);
                         isReady = true;
                     });
+                });
+            });
+        } catch (err) {
+            logger.log(err);
+            console.log(err.message);
+            return;
+        }
+    }
+}
+
+const mintDAI = async(privateKey) => {
+    const address = privateToAddress(privateKey);
+
+    let isReady;
+    while(!isReady) {
+        try {
+            await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
+                if (Number(gasPrice) < 1) {
+                    gasPrice = '1.5';
+                } else {
+                    gasPrice = parseFloat((gasPrice * 3)).toFixed(4).toString();
+                }
+                await dataMintDAI(info.rpcGoerli, address).then(async(res) => {
+                    await sendGoerliTX(info.rpcGoerli, res.estimateGas*2, gasPrice, info.DAIGoerli, res.valueMint, res.encodeABI, privateKey);
+                    console.log(chalk.yellow(`Mint 100 DAI`));
+                    logger.log(`Mint 1000 DAI`);
+                    isReady = true;
+                });
+            });
+        } catch (err) {
+            logger.log(err);
+            console.log(err.message);
+            return;
+        }
+    }
+}
+
+const mintHOP = async(privateKey) => {
+    const address = privateToAddress(privateKey);
+
+    let isReady;
+    while(!isReady) {
+        try {
+            await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
+                if (Number(gasPrice) < 1) {
+                    gasPrice = '1.5';
+                } else {
+                    gasPrice = parseFloat((gasPrice * 3)).toFixed(4).toString();
+                }
+                await dataMintHOP(info.rpcGoerli, address).then(async(res) => {
+                    await sendGoerliTX(info.rpcGoerli, res.estimateGas*2, gasPrice, info.HOPGoerli, res.valueMint, res.encodeABI, privateKey);
+                    console.log(chalk.yellow(`Mint 1000 HOP`));
+                    logger.log(`Mint 1000 HOP`);
+                    isReady = true;
                 });
             });
         } catch (err) {
@@ -121,10 +176,10 @@ const bridgeTokenToLinea = async(addressToken, privateKey) => {
                         isReady = true;
                         console.log(chalk.magentaBright(`Approve ${tokenName} Successful`));
                         logger.log(`Approve ${tokenName} Successful`);
+                        await timeout(pauseTime);
                     }
                 });
             });
-            await timeout(pauseTime);
         } catch (err) {
             logger.log(err);
             console.log(err.message);
@@ -172,7 +227,7 @@ const bridgeETHToBSC = async(privateKey) => {
     let isReady;
     while(!isReady) {
         try {
-            const amountETH = 0.03 * 10**18;
+            const amountETH = 0.035 * 10**18;
             await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
                 if (Number(gasPrice) < 1) {
                     gasPrice = '1.5';
@@ -198,55 +253,19 @@ const bridgeETHToBSC = async(privateKey) => {
     }
 }
 
-const bridgeETHToMATIC = async(privateKey) => {
-    const address = privateToAddress(privateKey);
-    const needGasPrice = process.env.GAS_PRICE_BRIDGE;
-
-    let isReady;
-    while(!isReady) {
-        try {
-            const amountETH = 0.01 * 10**18;
-            await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
-                if (Number(gasPrice) < 1) {
-                    gasPrice = '1.5';
-                } 
-                gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
-                if (Number(gasPrice) <= needGasPrice) {
-                    await dataBridgeZetaChainBSC(info.rpcGoerli, amountETH, address).then(async(res) => {
-                        await sendGoerliTX(info.rpcGoerli, parseInt(res.estimateGas*1.5), gasPrice, info.bridgeZetaChain, amountETH, res.encodeABI, privateKey);
-                        console.log(chalk.yellow(`Bridge ${amountETH / 10**18}ETH to Polygon`));
-                        logger.log(`Bridge ${amountETH / 10**18}ETH to Polygon`);
-                        isReady = true;
-                    });
-                } else if (Number(gasPrice) > needGasPrice) {
-                    console.log(`GasPrice NOW = ${gasPrice} > NEED ${needGasPrice}`);
-                    await timeout(5000);
-                }
-            });
-        } catch (err) {
-            logger.log(err);
-            console.log(err.message);
-            return;
-        }
-    }
-}
-
-const mintDAI = async(privateKey) => {
+const bridgeBNBToLinea = async(privateKey) => {
     const address = privateToAddress(privateKey);
 
     let isReady;
     while(!isReady) {
         try {
-            await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
-                if (Number(gasPrice) < 1) {
-                    gasPrice = '1.5';
-                } else {
-                    gasPrice = parseFloat((gasPrice * 3)).toFixed(4).toString();
-                }
-                await dataMintDAI(info.rpcGoerli, address).then(async(res) => {
-                    await sendGoerliTX(info.rpcGoerli, res.estimateGas*2, gasPrice, info.DAIGoerli, res.valueMint, res.encodeABI, privateKey);
-                    console.log(chalk.yellow(`Mint 100 DAI`));
-                    logger.log(`Mint 1000 DAI`);
+            const amountETH = 0.001 * 10**18;
+            await getGasPrice(info.rpcBSC).then(async(gasPrice) => {
+                gasPrice = parseFloat((gasPrice * 1.1)).toFixed(4).toString();
+                await dataBridgeBNBToLinea(info.rpcBSC, amountETH, address).then(async(res) => {
+                    await sendEVMTX(info.rpcBSC, 0, parseInt(res.estimateGas*1.5), info.bridgeCeler, amountETH, res.encodeABI, privateKey, gasPrice);
+                    console.log(chalk.yellow(`Bridge ${amountETH / 10**18}BNB to Celer`));
+                    logger.log(`Bridge ${amountETH / 10**18}BNB to Celer`);
                     isReady = true;
                 });
             });
@@ -258,22 +277,76 @@ const mintDAI = async(privateKey) => {
     }
 }
 
-const mintHOP = async(privateKey) => {
+const bridgeBUSDToLinea = async(privateKey) => {
+    const address = privateToAddress(privateKey);
+
+    let isReady;
+    while(!isReady) {
+        //APPROVE LP
+        console.log(chalk.yellow(`Approve BUSD for Celer Bridge`));
+        logger.log(`Approve BUSD for Celer Bridge`);
+        try {
+            await getAmountToken(info.rpcBSC, info.BUSDCeler, address).then(async(balance) => {
+                await checkAllowance(info.rpcBSC, info.BUSDCeler, address, info.bridgeCeler).then(async(res) => {
+                    if (Number(res) < balance) {
+                        console.log(chalk.yellow(`Start Approve BUSD for Celer Bridge`));
+                        logger.log(`Start Approve BUSD for Celer Bridge`);
+                        await dataApprove(info.rpcBSC, info.BUSDCeler, info.bridgeCeler, address).then(async(res1) => {
+                            await getGasPrice(info.rpcBSC).then(async(gasPrice) => {
+                                gasPrice = parseFloat((gasPrice * 1.1)).toFixed(4).toString();
+                                await sendEVMTX(info.rpcBSC, 0, res1.estimateGas, info.BUSDCeler, null, res1.encodeABI, privateKey, gasPrice);
+                            });
+                        });
+                    } else if (Number(res) >= balance) {
+                        isReady = true;
+                        console.log(chalk.magentaBright(`Approve BUSD Successful`));
+                        logger.log(`Approve BUSD Successful`);
+                        await timeout(pauseTime);
+                    }
+                });
+            });
+        } catch (err) {
+            logger.log(err);
+            console.log(err.message);
+            return;
+        }
+    }
+
+    isReady = false;
+    while(!isReady) {
+        try {
+            await getGasPrice(info.rpcBSC).then(async(gasPrice) => {
+                gasPrice = parseFloat((gasPrice * 1.1)).toFixed(4).toString(); //GET AMO
+                await getAmountToken(info.rpcBSC, info.BUSDCeler, address).then(async(amountBUSD) => {
+                    amountBUSD = parseInt(amountBUSD * 0.1);
+                    await dataBridgeBUSDToLinea(info.rpcBSC, amountBUSD, address).then(async(res) => {
+                        await sendEVMTX(info.rpcBSC, 0, parseInt(res.estimateGas*1.5), info.bridgeCeler, null, res.encodeABI, privateKey, gasPrice);
+                        console.log(chalk.yellow(`Bridge ${amountBUSD / 10**18}BUSD to Celer`));
+                        logger.log(`Bridge ${amountBUSD / 10**18}BUSD to Celer`);
+                        isReady = true;
+                    });
+                });
+            });
+        } catch (err) {
+            logger.log(err);
+            console.log(err.message);
+            return;
+        }
+    }
+}
+
+const mintBUSD = async(privateKey) => {
     const address = privateToAddress(privateKey);
 
     let isReady;
     while(!isReady) {
         try {
-            await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
-                if (Number(gasPrice) < 1) {
-                    gasPrice = '1.5';
-                } else {
-                    gasPrice = parseFloat((gasPrice * 3)).toFixed(4).toString();
-                }
-                await dataMintHOP(info.rpcGoerli, address).then(async(res) => {
-                    await sendGoerliTX(info.rpcGoerli, res.estimateGas*2, gasPrice, info.HOPGoerli, res.valueMint, res.encodeABI, privateKey);
-                    console.log(chalk.yellow(`Mint 1000 HOP`));
-                    logger.log(`Mint 1000 HOP`);
+            await getGasPrice(info.rpcBSC).then(async(gasPrice) => {
+                gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
+                await dataMintBUSD(info.rpcBSC, address).then(async(res) => {
+                    await sendEVMTX(info.rpcBSC, 0, res.estimateGas, info.BUSDFaucet, res.valueMint, res.encodeABI, privateKey, gasPrice);
+                    console.log(chalk.yellow(`Mint BUSD`));
+                    logger.log(`Mint BUSD`);
                     isReady = true;
                 });
             });
@@ -302,7 +375,7 @@ const swapETHToUSDC = async(privateKey) => {
                     await dataSwapETHToUSDC(info.rpcGoerli, address).then(async(res) => {
                         await sendGoerliTX(info.rpcGoerli, res.estimateGas, gasPrice, info.routerUniswap, res.valueTX, res.encodeABI, privateKey);
                         console.log(chalk.yellow(`Swap ${res.valueTX / 10**18}ETH to USDC`));
-                        logger.log(`Bridge ${res.valueTX / 10**18}ETH to USDC`);
+                        logger.log(`Swap ${res.valueTX / 10**18}ETH to USDC`);
                         isReady = true;
                     });
                 } else if (Number(gasPrice) > needGasPrice) {
@@ -322,22 +395,66 @@ const swapETHToUSDC = async(privateKey) => {
 (async() => {
     const wallet = parseFile('private.txt');
     const mainStage = [
-        'Bridge ETH Arbitrum -> Goerli',
+        'START',
+        'HOP Bridge',
+        'CELER Bridge',
+        'OTHER'
+    ];
+
+    const startStage = [
+        'Bridge ETH Arbitrum -> Goerli [Leyer0]',
+        'Bridge BNB Goerli -> BSC zetaChain'
+    ];
+
+    const hopStage = [
+        'Mint DAI',
+        'Mint HOP',
+        'Swap ETH to USDC',
         'Bridge ETH to Linea',
         'Bridge DAI to Linea',
         'Bridge HOP to Linea',
-        'Bridge USDC to Linea',
-        'Bridge ETH to BSC zetaChain',
-        'Bridge ETH to MATIC zetaChain',
-        'Mint DAI',
-        'Mint HOP',
-        'Swap ETH to USDC'
+        'Bridge USDC to Linea'
+    ];
+
+    const celerStage = [
+        'Mint BUSD',
+        'Bridge BNB -> Linea',
+        'Bridge BUSD -> Linea',
+    ];
+
+    const otherStage = [
+
     ];
 
     const index = readline.keyInSelect(mainStage, 'Choose stage!');
+    let index1;
+    let index2;
+    let index3;
+    let index4;
     if (index == -1) { process.exit() };
     console.log(chalk.green(`Start ${mainStage[index]}`));
     logger.log(`Start ${mainStage[index]}`);
+    if (index == 0) {
+        index1 = readline.keyInSelect(startStage, 'Choose stage!');
+        if (index1 == -1) { process.exit() };
+        console.log(chalk.green(`Start ${startStage[index1]}`));
+        logger.log(`Start ${startStage[index1]}`);
+    } else if (index == 1) {
+        index2 = readline.keyInSelect(hopStage, 'Choose stage!');
+        if (index2 == -1) { process.exit() };
+        console.log(chalk.green(`Start ${hopStage[index2]}`));
+        logger.log(`Start ${hopStage[index2]}`);
+    } else if (index == 2) {
+        index3 = readline.keyInSelect(celerStage, 'Choose stage!');
+        if (index3 == -1) { process.exit() };
+        console.log(chalk.green(`Start ${celerStage[index3]}`));
+        logger.log(`Start ${celerStage[index3]}`);
+    } else if (index == 3) {
+        index4 = readline.keyInSelect(otherStage, 'Choose stage!');
+        if (index4 == -1) { process.exit() };
+        console.log(chalk.green(`Start ${otherStage[index4]}`));
+        logger.log(`Start ${otherStage[index4]}`);
+    }
     
     for (let i = 0; i < wallet.length; i++) {
         let pauseWalletTime = generateRandomAmount(process.env.TIMEOUT_WALLET_SEC_MIN * 1000, process.env.TIMEOUT_WALLET_SEC_MAX * 1000, 0);
@@ -346,26 +463,34 @@ const swapETHToUSDC = async(privateKey) => {
             logger.log(`Wallet ${i+1}: ${privateToAddress(wallet[i])}`);
         } catch (err) { throw new Error('Error: Add Private Keys!') };
 
-        if (index == 0) { //BRIDGE STAGE
+        if (index1 == 0) { //START STAGE
             await bridgeETHToGoerli(wallet[i]);
-        } else if (index == 1) {
-            await bridgeETHToLinea(wallet[i]);
-        } else if (index == 2) {
-            await bridgeTokenToLinea(info.DAIGoerli, wallet[i]);
-        } else if (index == 3) {
-            await bridgeTokenToLinea(info.HOPGoerli, wallet[i]);
-        } else if (index == 4) {
-            await bridgeTokenToLinea(info.USDCGoerli, wallet[i]);
-        } else if (index == 5) {
+        } else if (index1 == 1) {
             await bridgeETHToBSC(wallet[i]);
-        } else if (index == 6) {
-            await bridgeETHToMATIC(wallet[i]);
-        } else if (index == 7) {
+        }
+
+        if (index2 == 0) { //HOP STAGE
             await mintDAI(wallet[i]);
-        } else if (index == 8) {
+        } else if (index2 == 1) {
             await mintHOP(wallet[i]);
-        } else if (index == 9) {
+        } else if (index2 == 2) {
             await swapETHToUSDC(wallet[i]);
+        } else if (index2 == 3) {
+            await bridgeETHToLinea(wallet[i]);
+        } else if (index2 == 4) {
+            await bridgeTokenToLinea(info.DAIGoerli, wallet[i]);
+        } else if (index2 == 5) {
+            await bridgeTokenToLinea(info.HOPGoerli, wallet[i]);
+        } else if (index2 == 6) {
+            await bridgeTokenToLinea(info.USDCGoerli, wallet[i]);
+        }
+
+        if (index3 == 0) { //CELER STAGE
+            await mintBUSD(wallet[i]);
+        } else if (index3 == 1) {
+            await bridgeBNBToLinea(wallet[i]);
+        } else if (index3 == 2) {
+            await bridgeBUSDToLinea(wallet[i]);
         }
 
         await timeout(pauseWalletTime);

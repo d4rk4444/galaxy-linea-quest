@@ -1,6 +1,6 @@
 import Web3 from 'web3';
 import { info } from './other.js';
-import { abiToken } from './abi.js';
+import { abiToken, celerAbi } from './abi.js';
 
 export const dataMintHOP = async(rpc, addressTo) => {
     const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
@@ -32,4 +32,17 @@ export const dataMintDAI = async(rpc, addressTo) => {
     const encodeABI = data.encodeABI();
     const estimateGas = await data.estimateGas({ from: addressTo, value: valueMint });
     return { encodeABI, estimateGas, valueMint };
+}
+
+export const dataMintBUSD = async(rpc, addressTo) => {
+    const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    const contract = new w3.eth.Contract(celerAbi, info.BUSDFaucet);
+
+    const data = await contract.methods.drip(
+        [info.BUSDCeler]
+    );
+    
+    const encodeABI = data.encodeABI();
+    const estimateGas = await data.estimateGas({ from: addressTo });
+    return { encodeABI, estimateGas };
 }

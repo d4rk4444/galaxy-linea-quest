@@ -103,7 +103,15 @@ export const uniAbi = [
         "outputs":[],
         "stateMutability":"payable",
         "type":"function"
-    }
+    },
+    {
+        "type":"function",
+        "name":"multicall",
+        "inputs": [
+            {"name":"deadline","type":"uint256"},
+            {"name":"data","type":"bytes[]"}
+        ],
+    },
 ]
 
 export const leyerAbi = [
@@ -148,6 +156,37 @@ export const leyerAbi = [
             {"name":"refundAddress","type":"address"},
             {"name":"zroPaymentAddress","type":"address"},
             {"name":"adapterParams","type":"bytes"},
+        ],
+    },
+]
+
+export const celerAbi = [
+    {
+        "type":"function",
+        "name":"depositNative",
+        "inputs": [
+            {"name":"_amount","type":"uint256"},
+            {"name":"_mintChainId","type":"uint64"},
+            {"name":"_mintAccount","type":"address"},
+            {"name":"_nonce","type":"uint64"},
+        ],
+    },
+    {
+        "type":"function",
+        "name":"drip",
+        "inputs": [
+            {"name":"tokens","type":"address[]"}
+        ],
+    },
+    {
+        "type":"function",
+        "name":"deposit",
+        "inputs": [
+            {"name":"_token","type":"address"},
+            {"name":"_amount","type":"uint256"},
+            {"name":"_mintChainId","type":"uint64"},
+            {"name":"_mintAccount","type":"address"},
+            {"name":"_nonce","type":"uint64"},
         ],
     },
 ]
