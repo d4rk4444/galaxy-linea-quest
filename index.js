@@ -16,13 +16,14 @@ import { checkAllowance,
 import { dataMintBUSD, dataMintDAI, dataMintHOP, dataMintUNI, dataMintUSDT } from './tools/mint.js';
 import { dataBridgeETHtoGoerli, dataBridgeETHtoLinea, dataBridgeTokentoLinea, dataBridgeZetaChainBSC } from './tools/bridge.js';
 import { dataSwapBNBToBUSD, dataSwapETHToUSDC } from './tools/DEX.js';
+import { dataBridgeBNBToLinea, dataBridgeBUSDToLinea } from './tools/celer.js';
+import { dataBridgeUSDTToLinea, dataBridgeUNIToLinea } from './tools/LiFi.js';
 import { subtract, multiply, divide, add } from 'mathjs';
 import fs from 'fs';
 import readline from 'readline-sync';
 import consoleStamp from 'console-stamp';
 import chalk from 'chalk';
 import * as dotenv from 'dotenv';
-import { dataBridgeBNBToLinea, dataBridgeBUSDToLinea } from './tools/celer.js';
 dotenv.config();
 
 const output = fs.createWriteStream(`history.log`, { flags: 'a' });
@@ -205,7 +206,7 @@ const swapETHToUSDC = async(privateKey) => {
 const bridgeETHToLinea = async(privateKey) => {
     const address = privateToAddress(privateKey);
     const needGasPrice = process.env.GAS_PRICE_BRIDGE;
-    const amountETH = generateRandomAmount(process.env.AMOUNT_ETH_BRIDGE_MIN * 10**18, process.env.AMOUNT_ETH_BRIDGE_MAX * 10**18, 0);
+    const amountETH = generateRandomAmount(process.env.AMOUNT_ETH_BRIDGE_MIN, process.env.AMOUNT_ETH_BRIDGE_MAX, 3) * 1000 + '000000000000000';
 
     let isReady;
     while(!isReady) {
@@ -214,7 +215,7 @@ const bridgeETHToLinea = async(privateKey) => {
                 if (Number(gasPrice) < 1) {
                     gasPrice = '1.5';
                 } 
-                gasPrice = parseFloat((gasPrice * 1.1)).toFixed(4).toString();
+                gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
                 if (Number(gasPrice) <= needGasPrice) {
                     await dataBridgeETHtoLinea(info.rpcGoerli, amountETH, address).then(async(res) => {
                         await sendGoerliTX(info.rpcGoerli, res.estimateGas*2, gasPrice, info.bridgeHop, res.valueTX, res.encodeABI, privateKey);
@@ -275,8 +276,6 @@ const bridgeTokenToLinea = async(addressToken, privateKey) => {
 
     isReady = false;
     while(!isReady) {
-        console.log(chalk.yellow(`Start bridge ${tokenName} to Linea`));
-        logger.log(`Start bridge ${tokenName} to Linea`);
         try {
             await getAmountToken(info.rpcGoerli, addressToken, address).then(async(amountToken) => {
                 if (tokenName == 'USDC') {
@@ -287,6 +286,8 @@ const bridgeTokenToLinea = async(addressToken, privateKey) => {
                     if (Number(gasPrice) < 1) { gasPrice = '1.5'; } 
                     gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
                     if (Number(gasPrice) <= needGasPrice) {
+                        console.log(chalk.yellow(`Start bridge ${tokenName} to Linea`));
+                        logger.log(`Start bridge ${tokenName} to Linea`);
                         await dataBridgeTokentoLinea(info.rpcGoerli, info['bridgeHop' + tokenName], amountToken, address).then(async(res) => {
                             await sendGoerliTX(info.rpcGoerli, res.estimateGas*2, gasPrice, info['bridgeHop' + tokenName], res.valueTX, res.encodeABI, privateKey);
                             const decimalsTkn = addressToken == info.USDCGoerli ? 6 : 18;
@@ -347,7 +348,7 @@ const bridgeBNBToLinea = async(privateKey) => {
     let isReady;
     while(!isReady) {
         try {
-            const amountETH = 0.01 * 10**18;
+            const amountETH = generateRandomAmount(0.01, 0.04, 3) * 10**18;
             await getGasPrice(info.rpcBSC).then(async(gasPrice) => {
                 gasPrice = parseFloat((gasPrice * 2)).toFixed(4).toString();
                 await dataBridgeBNBToLinea(info.rpcBSC, amountETH, address).then(async(res) => {
@@ -422,6 +423,74 @@ const bridgeBUSDToLinea = async(privateKey) => {
     }
 }
 
+const bridgeLiFiToLinea = async(addressToken, privateKey) => {
+    const address = privateToAddress(privateKey);
+    const needGasPrice = process.env.GAS_PRICE_BRIDGE;
+    const tokenName = (Object.keys(info)[Object.values(info).findIndex(e => e == addressToken)]).slice(0, -6);
+
+    let isReady;
+    while(!isReady) {
+        //APPROVE LP
+        console.log(chalk.yellow(`Approve ${tokenName} for Li.Fi Bridge`));
+        logger.log(`Approve ${tokenName} for Li.Fi Bridge`);
+        try {
+            await getAmountToken(info.rpcGoerli, addressToken, address).then(async(balance) => {
+                await checkAllowance(info.rpcGoerli, addressToken, address, info.bridgeLiFi).then(async(res) => {
+                    if (Number(res) < balance) {
+                        console.log(chalk.yellow(`Start Approve ${tokenName} for Li.Fi Bridge`));
+                        logger.log(`Start Approve ${tokenName} for Li.Fi Bridge`);
+                        await dataApprove(info.rpcGoerli, addressToken, info.bridgeLiFi, balance, address).then(async(res1) => {
+                            await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
+                                gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
+                                await sendEVMTX(info.rpcGoerli, 0, res1.estimateGas, addressToken, null, res1.encodeABI, privateKey, gasPrice);
+                            });
+                        });
+                    } else if (Number(res) >= balance) {
+                        isReady = true;
+                        console.log(chalk.magentaBright(`Approve ${tokenName} Successful`));
+                        logger.log(`Approve ${tokenName} Successful`);
+                        await timeout(pauseTime);
+                    }
+                });
+            });
+        } catch (err) {
+            logger.log(err);
+            console.log(err.message);
+            return;
+        }
+    }
+
+    isReady = false;
+    while(!isReady) {
+        try {
+            await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
+                if (Number(gasPrice) < 1) {
+                    gasPrice = '1.5';
+                }
+                gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
+                if (Number(gasPrice) <= needGasPrice) {
+                    console.log(chalk.yellow(`Start Bridge ${tokenName} to Linea`));
+                    logger.log(`Start Bridge ${tokenName} to Linea`);
+                    const func = addressToken == info.USDTGoerli ? dataBridgeUSDTToLinea : dataBridgeUNIToLinea;
+                    await func(info.rpcGoerli, address).then(async(res) => {
+                        await sendEVMTX(info.rpcGoerli, 0, parseInt(res.estimateGas*1.2), info.bridgeLiFi, res.valueFoTx, res.encodeABI, privateKey, gasPrice);
+                        console.log(chalk.yellow(`Bridge ${tokenName} to Li.Fi`));
+                        logger.log(`Bridge ${tokenName} to Li.Fi`);
+                        isReady = true;
+                    });
+                } else if (Number(gasPrice) > needGasPrice) {
+                    console.log(`GasPrice NOW = ${gasPrice} > NEED ${needGasPrice}`);
+                    await timeout(5000);
+                }
+            });
+        } catch (err) {
+            logger.log(err);
+            console.log(err.message);
+            return;
+        }
+    }
+}
+
 const mintBUSD = async(privateKey) => {
     const address = privateToAddress(privateKey);
 
@@ -459,6 +528,25 @@ const getBalanceWallet = async(privateKey) => {
         console.log(chalk.magentaBright('Balance Arbitrum'));
         console.log(`${res / 10**18}ETH`);
     });
+    await getETHAmount(info.rpcGoerli, address).then(async(res) => {
+        console.log(chalk.magentaBright('Balance Goerli'));
+        console.log(`${res / 10**18}ETH`);
+        await getAmountToken(info.rpcGoerli, info.DAIGoerli, address).then(async(res1) => {
+            console.log(`${res1 / 10**18}DAI`);
+        });
+        await getAmountToken(info.rpcGoerli, info.USDCGoerli, address).then(async(res1) => {
+            console.log(`${res1 / 10**6}USDC`);
+        });
+        await getAmountToken(info.rpcGoerli, info.UNIGoerli, address).then(async(res1) => {
+            console.log(`${res1 / 10**18}UNI`);
+        });
+        await getAmountToken(info.rpcGoerli, info.USDTGoerli, address).then(async(res1) => {
+            console.log(`${res1 / 10**18}USDT`);
+        });
+        await getAmountToken(info.rpcGoerli, info.HOPGoerli, address).then(async(res1) => {
+            console.log(`${res1 / 10**18}HOP`);
+        });
+    });
     await getETHAmount(info.rpcBSC, address).then(async(res) => {
         console.log(chalk.magentaBright('Balance BSC'));
         console.log(`${res / 10**18}ETH`);
@@ -466,7 +554,7 @@ const getBalanceWallet = async(privateKey) => {
             console.log(`${res1 / 10**18}BUSD`);
         });
     });
-    await getETHAmount(info.rpcLinea, address).then(async(res) => {
+    /*await getETHAmount(info.rpcLinea, address).then(async(res) => {
         await getAmountToken(info.rpcLinea, info.USDCLinea, address).then(async(res1) => {
             console.log(chalk.magentaBright('Balance Linea'));
             console.log(`${res / 10**18}ETH`);
@@ -484,7 +572,7 @@ const getBalanceWallet = async(privateKey) => {
                 });
             });
         });
-    });
+    });*/
 }
 
 
@@ -494,6 +582,7 @@ const getBalanceWallet = async(privateKey) => {
         'START',
         'HOP Bridge',
         'CELER Bridge',
+        'LiFi Bridge',
         'OTHER'
     ];
 
@@ -520,6 +609,11 @@ const getBalanceWallet = async(privateKey) => {
         'Bridge BUSD -> Linea',
     ];
 
+    const lifiStage = [
+        'Bridge USDT -> Linea',
+        'Bridge UNI -> Linea'
+    ];
+
     const otherStage = [
         'Check Balance'
     ];
@@ -529,6 +623,7 @@ const getBalanceWallet = async(privateKey) => {
     let index2;
     let index3;
     let index4;
+    let index5;
     if (index == -1) { process.exit() };
     console.log(chalk.green(`Start ${mainStage[index]}`));
     logger.log(`Start ${mainStage[index]}`);
@@ -548,10 +643,15 @@ const getBalanceWallet = async(privateKey) => {
         console.log(chalk.green(`Start ${celerStage[index3]}`));
         logger.log(`Start ${celerStage[index3]}`);
     } else if (index == 3) {
-        index4 = readline.keyInSelect(otherStage, 'Choose stage!');
+        index4 = readline.keyInSelect(lifiStage, 'Choose stage!');
         if (index4 == -1) { process.exit() };
-        console.log(chalk.green(`Start ${otherStage[index4]}`));
-        logger.log(`Start ${otherStage[index4]}`);
+        console.log(chalk.green(`Start ${lifiStage[index4]}`));
+        logger.log(`Start ${lifiStage[index4]}`);
+    } else if (index == 4) {
+        index5 = readline.keyInSelect(otherStage, 'Choose stage!');
+        if (index5 == -1) { process.exit() };
+        console.log(chalk.green(`Start ${otherStage[index5]}`));
+        logger.log(`Start ${otherStage[index5]}`);
     }
     
     for (let i = 0; i < wallet.length; i++) {
@@ -595,7 +695,13 @@ const getBalanceWallet = async(privateKey) => {
             await bridgeBUSDToLinea(wallet[i]);
         }
 
-        if (index4 == 0) { //OTHER STAGE
+        if (index4 == 0) { //LIFI STAGE
+            await bridgeLiFiToLinea(info.USDTGoerli, wallet[i]);
+        } else if (index4 == 1) {
+            await bridgeLiFiToLinea(info.UNIGoerli, wallet[i]);
+        }
+
+        if (index5 == 0) { //OTHER STAGE
             pauseWalletTime = 0;
             await getBalanceWallet(wallet[i]);
         }
