@@ -500,13 +500,13 @@ const mintBUSD = async(privateKey) => {
             await getGasPrice(info.rpcBSC).then(async(gasPrice) => {
                 gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
                 await dataMintBUSD(info.rpcBSC, address).then(async(res) => {
-                    await sendEVMTX(info.rpcBSC, 0, res.estimateGas, info.BUSDFaucet, res.valueMint, res.encodeABI, privateKey, gasPrice);
+                    await sendEVMTX(info.rpcBSC, 0, res.estimateGas*2, info.BUSDFaucet, res.valueMint, res.encodeABI, privateKey, gasPrice);
                     console.log(chalk.yellow(`Mint BUSD`));
                     logger.log(`Mint BUSD`);
                     await getAmountToken(info.rpcBSC, info.BUSDCeler, address).then((balanceBUSD) => {
-                        if (balanceBUSD > 10 * 10**18) {
+                        if (balanceBUSD > 12 * 10**18) {
                             isReady = true;
-                        } else if (balanceBUSD <= 10 * 10**18) {
+                        } else if (balanceBUSD <= 12 * 10**18) {
                             console.log(chalk.yellow(`Balance ${balanceBUSD / 10**18}BUSD < 10 Mint Again`));
                             logger.log(`Balance ${balanceBUSD / 10**18}BUSD < 10 Mint Again`);
                         }
@@ -549,7 +549,7 @@ const getBalanceWallet = async(privateKey) => {
     });
     await getETHAmount(info.rpcBSC, address).then(async(res) => {
         console.log(chalk.magentaBright('Balance BSC'));
-        console.log(`${res / 10**18}ETH`);
+        console.log(`${res / 10**18}BNB`);
         await getAmountToken(info.rpcBSC, info.BUSDCeler, address).then(async(res1) => {
             console.log(`${res1 / 10**18}BUSD`);
         });
