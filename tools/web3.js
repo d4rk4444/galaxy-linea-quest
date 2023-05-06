@@ -39,13 +39,13 @@ export const checkAllowance = async(rpc, tokenAddress, walletAddress, spender) =
     return data;
 }
 
-export const dataApprove = async(rpc, tokenAddress, contractAddress, fromAddress) => {
+export const dataApprove = async(rpc, tokenAddress, contractAddress, amountAprove, fromAddress) => {
     const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
     const contract = new w3.eth.Contract(abiToken, w3.utils.toChecksumAddress(tokenAddress));
 
     const data = await contract.methods.approve(
         contractAddress,
-        info.approveAmount,
+        amountAprove,
     );
     const encodeABI = data.encodeABI();
     const estimateGas = await data.estimateGas({ from: fromAddress });

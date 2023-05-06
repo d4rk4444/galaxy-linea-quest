@@ -251,9 +251,9 @@ const bridgeTokenToLinea = async(addressToken, privateKey) => {
                     if (Number(res) < balance) {
                         console.log(chalk.yellow(`Start Approve ${tokenName} for Hop Router`));
                         logger.log(`Start Approve ${tokenName} for Hop Router`);
-                        await dataApprove(info.rpcGoerli, addressToken, info['bridgeHop' + tokenName], address).then(async(res1) => {
+                        await dataApprove(info.rpcGoerli, addressToken, info['bridgeHop' + tokenName], balance, address).then(async(res1) => {
                             await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
-                                if (Number(gasPrice) < 1) { gasPrice = '1.5'; } 
+                                if (Number(gasPrice) < 1) { gasPrice = '1.5'; }
                                 gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
                                 await sendEVMTX(info.rpcGoerli, 2, res1.estimateGas, addressToken, null, res1.encodeABI, privateKey, gasPrice, '1.5');
                             });
@@ -279,14 +279,16 @@ const bridgeTokenToLinea = async(addressToken, privateKey) => {
         logger.log(`Start bridge ${tokenName} to Linea`);
         try {
             await getAmountToken(info.rpcGoerli, addressToken, address).then(async(amountToken) => {
+                if (tokenName == 'USDC') {
+                    amountToken = parseFloat(amountToken / 10**6).toFixed(1) * 10**6;
+                }
                 amountToken = parseInt(amountToken * 0.1);
                 await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
                     if (Number(gasPrice) < 1) { gasPrice = '1.5'; } 
                     gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
                     if (Number(gasPrice) <= needGasPrice) {
-                        const gasLimit = generateRandomAmount(700000, 1000000, 0);
                         await dataBridgeTokentoLinea(info.rpcGoerli, info['bridgeHop' + tokenName], amountToken, address).then(async(res) => {
-                            await sendGoerliTX(info.rpcGoerli, gasLimit, gasPrice, info['bridgeHop' + tokenName], res.valueTX, res.encodeABI, privateKey);
+                            await sendGoerliTX(info.rpcGoerli, res.estimateGas*2, gasPrice, info['bridgeHop' + tokenName], res.valueTX, res.encodeABI, privateKey);
                             const decimalsTkn = addressToken == info.USDCGoerli ? 6 : 18;
                             console.log(chalk.yellow(`Bridge ${amountToken / 10**decimalsTkn}${tokenName} to Linea`));
                             logger.log(`Bridge ${amountToken / 10**decimalsTkn}${tokenName} to Linea`);
@@ -377,7 +379,7 @@ const bridgeBUSDToLinea = async(privateKey) => {
                     if (Number(res) < balance) {
                         console.log(chalk.yellow(`Start Approve BUSD for Celer Bridge`));
                         logger.log(`Start Approve BUSD for Celer Bridge`);
-                        await dataApprove(info.rpcBSC, info.BUSDCeler, info.bridgeCeler, address).then(async(res1) => {
+                        await dataApprove(info.rpcBSC, info.BUSDCeler, info.bridgeCeler, balance, address).then(async(res1) => {
                             await getGasPrice(info.rpcBSC).then(async(gasPrice) => {
                                 gasPrice = parseFloat((gasPrice * 2)).toFixed(4).toString();
                                 await sendEVMTX(info.rpcBSC, 0, res1.estimateGas, info.BUSDCeler, null, res1.encodeABI, privateKey, gasPrice);
@@ -402,9 +404,8 @@ const bridgeBUSDToLinea = async(privateKey) => {
     while(!isReady) {
         try {
             await getGasPrice(info.rpcBSC).then(async(gasPrice) => {
-                gasPrice = parseFloat((gasPrice * 1.1)).toFixed(4).toString(); //GET AMO
+                gasPrice = parseFloat((gasPrice * 1.1)).toFixed(4).toString();
                 await getAmountToken(info.rpcBSC, info.BUSDCeler, address).then(async(amountBUSD) => {
-                    amountBUSD = add(parseInt(amountBUSD * 0.1), 10 * 10**18);
                     await dataBridgeBUSDToLinea(info.rpcBSC, amountBUSD, address).then(async(res) => {
                         await sendEVMTX(info.rpcBSC, 0, parseInt(res.estimateGas*1.5), info.bridgeCeler, null, res.encodeABI, privateKey, gasPrice);
                         console.log(chalk.yellow(`Bridge ${amountBUSD / 10**18}BUSD to Celer`));
@@ -433,7 +434,14 @@ const mintBUSD = async(privateKey) => {
                     await sendEVMTX(info.rpcBSC, 0, res.estimateGas, info.BUSDFaucet, res.valueMint, res.encodeABI, privateKey, gasPrice);
                     console.log(chalk.yellow(`Mint BUSD`));
                     logger.log(`Mint BUSD`);
-                    isReady = true;
+                    await getAmountToken(info.rpcBSC, info.BUSDCeler, address).then((balanceBUSD) => {
+                        if (balanceBUSD > 10 * 10**18) {
+                            isReady = true;
+                        } else if (balanceBUSD <= 10 * 10**18) {
+                            console.log(chalk.yellow(`Balance ${balanceBUSD / 10**18}BUSD < 10 Mint Again`));
+                            logger.log(`Balance ${balanceBUSD / 10**18}BUSD < 10 Mint Again`);
+                        }
+                    });
                 });
             });
         } catch (err) {
