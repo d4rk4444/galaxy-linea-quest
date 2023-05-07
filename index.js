@@ -256,7 +256,7 @@ const bridgeTokenToLinea = async(addressToken, privateKey) => {
                             await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
                                 if (Number(gasPrice) < 1) { gasPrice = '1.5'; }
                                 gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
-                                await sendEVMTX(info.rpcGoerli, 2, res1.estimateGas, addressToken, null, res1.encodeABI, privateKey, gasPrice, '1.5');
+                                await sendEVMTX(info.rpcGoerli, 0, res1.estimateGas, addressToken, null, res1.encodeABI, privateKey, gasPrice);
                             });
                         });
                     } else if (Number(res) >= balance) {
@@ -473,7 +473,7 @@ const bridgeLiFiToLinea = async(addressToken, privateKey) => {
                     logger.log(`Start Bridge ${tokenName} to Linea`);
                     const func = addressToken == info.USDTGoerli ? dataBridgeUSDTToLinea : dataBridgeUNIToLinea;
                     await func(info.rpcGoerli, address).then(async(res) => {
-                        await sendEVMTX(info.rpcGoerli, 0, parseInt(res.estimateGas*1.2), info.bridgeLiFi, res.valueFoTx, res.encodeABI, privateKey, gasPrice);
+                        await sendEVMTX(info.rpcGoerli, 0, parseInt(res.estimateGas*1.2), info.bridgeLiFi, res.valueForTx, res.encodeABI, privateKey, gasPrice);
                         console.log(chalk.yellow(`Bridge ${tokenName} to Li.Fi`));
                         logger.log(`Bridge ${tokenName} to Li.Fi`);
                         isReady = true;
@@ -541,7 +541,7 @@ const getBalanceWallet = async(privateKey) => {
             console.log(`${res1 / 10**18}UNI`);
         });
         await getAmountToken(info.rpcGoerli, info.USDTGoerli, address).then(async(res1) => {
-            console.log(`${res1 / 10**18}USDT`);
+            console.log(`${res1 / 10**6}USDT`);
         });
         await getAmountToken(info.rpcGoerli, info.HOPGoerli, address).then(async(res1) => {
             console.log(`${res1 / 10**18}HOP`);

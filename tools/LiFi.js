@@ -12,6 +12,7 @@ export const getQuote = async (fromChain, toChain, fromToken, toToken, fromAmoun
             toToken,
             fromAmount,
             fromAddress,
+            integrator: 'testnet.jumper.exchange'
         }
     });
 
@@ -22,7 +23,7 @@ export const dataBridgeUSDTToLinea = async(rpc, addressTo) => {
     const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
     const contract = new w3.eth.Contract(lifiABi, info.bridgeLiFi);
 
-    const valueFoTx = '20000000000000000';
+    const valueForTx = '20000000000000000';
     const deadline = Date.now() + 24 * 60 * 60 * 1000;
     const txID = w3.utils.padLeft(w3.utils.numberToHex('123623237232732382323783328732834242329232323942394923278278378238232932' + generateRandomAmount(1000, 9000, 0)), 64);
 
@@ -52,15 +53,15 @@ export const dataBridgeUSDTToLinea = async(rpc, addressTo) => {
     );
 
     const encodeABI = data.encodeABI();
-    const estimateGas = await data.estimateGas({ from: addressTo, data: encodeABI, value: valueFoTx });
-    return { encodeABI, estimateGas, valueFoTx };
+    const estimateGas = await data.estimateGas({ from: addressTo, data: encodeABI, value: valueForTx });
+    return { encodeABI, estimateGas, valueForTx };
 }
 
 export const dataBridgeUNIToLinea = async(rpc, addressTo) => {
     const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
     const contract = new w3.eth.Contract(lifiABi, info.bridgeLiFi);
 
-    const valueFoTx = '20000000000000000';
+    const valueForTx = '20000000000000000';
     const deadline = Date.now() + 24 * 60 * 60 * 1000;
     const txID = w3.utils.padLeft(w3.utils.numberToHex('123623237232732382323783328732834242329232323942394923278278378238232932' + generateRandomAmount(1000, 9000, 0)), 64);
 
@@ -85,11 +86,11 @@ export const dataBridgeUNIToLinea = async(rpc, addressTo) => {
             deadline,
             '0xB47dE784aB8702eC35c5eAb225D6f6cE476DdD28',
             '0',
-            '10000000000000000'
+            '20000000000000000'
         ]
     );
 
     const encodeABI = data.encodeABI();
-    const estimateGas = await data.estimateGas({ from: addressTo, data: encodeABI, value: valueFoTx });
-    return { encodeABI, estimateGas, valueFoTx };
+    const estimateGas = await data.estimateGas({ from: addressTo, data: encodeABI, value: valueForTx });
+    return { encodeABI, estimateGas, valueForTx };
 }

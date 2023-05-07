@@ -9,7 +9,7 @@ export const dataBridgeETHtoGoerli = async(rpc, amountETH, addressTo) => {
     const contract = new w3.eth.Contract(leyerAbi, info.routerL0Arb);
 
     const amountOutMin = parseInt(multiply(amountETH, 10));
-    const valueTX = add(amountETH, 0.0012 * 10**18);
+    const valueTX = add(amountETH, 0.002 * 10**18);
 
     const data = await contract.methods.swapAndBridge(
         w3.utils.numberToHex(amountETH),
