@@ -1,3 +1,4 @@
+import { info } from './other.js';
 import { request, gql, GraphQLClient } from 'graphql-request';
 
 export const verifyCred = async (credId, address) => {
@@ -10,9 +11,12 @@ export const verifyCred = async (credId, address) => {
             })
         }
     `;
-    const result = await graphQLClient.request(query);
-
-    return result;
+    try {
+        await graphQLClient.request(query);
+        return true;
+    } catch (err) {
+        return false;
+    } 
 }
 
 export const claimPoints = async (campaignID, address) => {
@@ -33,7 +37,30 @@ export const claimPoints = async (campaignID, address) => {
             }
         }
     `;
-    const result = await graphQLClient.request(query);
+    try {
+        await graphQLClient.request(query);
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
 
-    return result;
+export const balancePoints = async (address) => {
+    const graphQLClient = new GraphQLClient('https://graphigo.prd.galaxy.eco/query');
+    const query = gql`
+        query {
+            campaign(id: "GCd1YUZyrN") {
+                numberID
+                name
+                numNFTMinted
+                startTime
+                endTime
+                claimedTimes(address: "${address}")
+                claimedLoyaltyPoints (address: "${address}")
+            }
+        }
+    `;
+
+    const result = await graphQLClient.request(query);
+    return result.campaign.claimedLoyaltyPoints;
 }

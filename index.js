@@ -24,6 +24,7 @@ import readline from 'readline-sync';
 import consoleStamp from 'console-stamp';
 import chalk from 'chalk';
 import * as dotenv from 'dotenv';
+import { balancePoints, claimPoints, verifyCred } from './tools/galaxy.js';
 dotenv.config();
 
 const output = fs.createWriteStream(`history.log`, { flags: 'a' });
@@ -183,7 +184,6 @@ const swapETHToUSDC = async(privateKey) => {
                 } 
                 gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
                 if (Number(gasPrice) <= needGasPrice) {
-                    //const gasLimit = generateRandomAmount(700000, 1000000, 0);
                     await dataSwapETHToUSDC(info.rpcGoerli, address).then(async(res) => {
                         await sendGoerliTX(info.rpcGoerli, parseInt(res.estimateGas*1.5), gasPrice, info.routerUniswap, res.valueTX, res.encodeABI, privateKey);
                         console.log(chalk.yellow(`Swap ${res.valueTX / 10**18}ETH to USDC`));
@@ -554,17 +554,27 @@ const getBalanceWallet = async(privateKey) => {
             console.log(`${res1 / 10**18}BUSD`);
         });
     });
-    /*await getETHAmount(info.rpcLinea, address).then(async(res) => {
+}
+
+const getBalanceWalletLinea = async(privateKey) => {
+    const address = privateToAddress(privateKey);
+
+    await getETHAmount(info.rpcLinea, address).then(async(res) => {
+        await timeout(5000);
         await getAmountToken(info.rpcLinea, info.USDCLinea, address).then(async(res1) => {
             console.log(chalk.magentaBright('Balance Linea'));
             console.log(`${res / 10**18}ETH`);
             console.log(`${res1 / 10**6}USDC`);
+            await timeout(5000);
             await getAmountToken(info.rpcLinea, info.DAILinea, address).then(async(res2) => {
                 console.log(`${res2 / 10**18}DAI`);
+                await timeout(5000);
                 await getAmountToken(info.rpcLinea, info.HOPLinea, address).then(async(res3) => {
                     console.log(`${res3 / 10**18}HOP`);
+                    await timeout(5000);
                     await getAmountToken(info.rpcLinea, info.BNBLinea, address).then(async(res4) => {
                         console.log(`${res4 / 10**18}BNB`);
+                        await timeout(5000);
                         await getAmountToken(info.rpcLinea, info.BUSDLinea, address).then(async(res5) => {
                             console.log(`${res5 / 10**18}BUSD`);
                         });
@@ -572,7 +582,65 @@ const getBalanceWallet = async(privateKey) => {
                 });
             });
         });
-    });*/
+    });
+}
+
+const galaxyVerifyCred = async(privateKey) => {
+    const address = privateToAddress(privateKey);
+    const credArray = ['USDC', 'GETH', 'DAI', 'BUSD', 'BNB', 'UNI', 'USDT'];
+
+    for (let i = 0; i < credArray.length; i++) {
+        try {
+            await verifyCred(info['GalaxyCred' + credArray[i]], address).then((res) => {
+                if (res) {
+                    console.log(chalk.green(`Verify ${credArray[i]} Successful`));
+                    logger.log(`Verify ${credArray[i]} Successful`);
+                } else if (!res) {
+                    console.log(chalk.gray(`${credArray[i]} Not ready yet`));
+                    logger.log(`${credArray[i]} Not ready yet`);
+                }
+            });
+        } catch (err) {
+            logger.log(err);
+            console.log(err.message);
+            return;
+        }
+    }
+}
+
+const galaxyClaimPoints = async(privateKey) => {
+    const address = privateToAddress(privateKey);
+
+    try {
+        await claimPoints('GCd1YUZyrN', address).then((res) => {
+            if (res) {
+                console.log(chalk.green(`Claim Successful`));
+                logger.log(`Claim Successful`);
+            } else if (!res) {
+                console.log(chalk.gray(`Error Claim`));
+                logger.log(`Error Claim`);
+            }
+        });
+    } catch (err) {
+        logger.log(err);
+        console.log(err.message);
+        return;
+    }
+}
+
+const checkBalancePoints = async(privateKey) => {
+    const address = privateToAddress(privateKey);
+
+    try {
+        await balancePoints(address).then((res) => {
+            console.log(chalk.magentaBright(`${res} points`));
+            logger.log(`${res} points`);
+        });
+    } catch (err) {
+        logger.log(err);
+        console.log(err.message);
+        return;
+    }
 }
 
 
@@ -583,6 +651,7 @@ const getBalanceWallet = async(privateKey) => {
         'HOP Bridge',
         'CELER Bridge',
         'LiFi Bridge',
+        'GALAXY',
         'OTHER'
     ];
 
@@ -614,8 +683,15 @@ const getBalanceWallet = async(privateKey) => {
         'Bridge UNI -> Linea'
     ];
 
+    const galaxyStage = [
+        'Verify Credentials',
+        'Claim Points',
+        'Check Points Balance'
+    ];
+
     const otherStage = [
-        'Check Balance'
+        'Check Balance',
+        'Check Balance Linea'
     ];
 
     const index = readline.keyInSelect(mainStage, 'Choose stage!');
@@ -624,6 +700,7 @@ const getBalanceWallet = async(privateKey) => {
     let index3;
     let index4;
     let index5;
+    let index6;
     if (index == -1) { process.exit() };
     console.log(chalk.green(`Start ${mainStage[index]}`));
     logger.log(`Start ${mainStage[index]}`);
@@ -648,10 +725,15 @@ const getBalanceWallet = async(privateKey) => {
         console.log(chalk.green(`Start ${lifiStage[index4]}`));
         logger.log(`Start ${lifiStage[index4]}`);
     } else if (index == 4) {
-        index5 = readline.keyInSelect(otherStage, 'Choose stage!');
+        index5 = readline.keyInSelect(galaxyStage, 'Choose stage!');
         if (index5 == -1) { process.exit() };
-        console.log(chalk.green(`Start ${otherStage[index5]}`));
-        logger.log(`Start ${otherStage[index5]}`);
+        console.log(chalk.green(`Start ${galaxyStage[index5]}`));
+        logger.log(`Start ${galaxyStage[index5]}`);
+    } else if (index == 5) {
+        index6 = readline.keyInSelect(otherStage, 'Choose stage!');
+        if (index6 == -1) { process.exit() };
+        console.log(chalk.green(`Start ${otherStage[index6]}`));
+        logger.log(`Start ${otherStage[index6]}`);
     }
     
     for (let i = 0; i < wallet.length; i++) {
@@ -701,9 +783,20 @@ const getBalanceWallet = async(privateKey) => {
             await bridgeLiFiToLinea(info.UNIGoerli, wallet[i]);
         }
 
-        if (index5 == 0) { //OTHER STAGE
+        if (index5 == 0) { //GALAXY STAGE
+            await galaxyVerifyCred(wallet[i]);
+        } else if (index5 == 1) {
+            await galaxyClaimPoints(wallet[i]);
+        } else if (index5 == 2) {
+            await checkBalancePoints(wallet[i]);
+        }
+
+        if (index6 == 0) { //OTHER STAGE
             pauseWalletTime = 0;
             await getBalanceWallet(wallet[i]);
+        } else if (index6 == 1) {
+            pauseWalletTime = 0;
+            await getBalanceWalletLinea(wallet[i]);
         }
 
         await timeout(pauseWalletTime);
