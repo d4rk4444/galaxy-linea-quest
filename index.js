@@ -348,7 +348,7 @@ const bridgeBNBToLinea = async(privateKey) => {
     let isReady;
     while(!isReady) {
         try {
-            const amountETH = generateRandomAmount(0.01, 0.04, 3) * 10**18;
+            const amountETH = generateRandomAmount(0.01, 0.015, 3) * 10**18;
             await getGasPrice(info.rpcBSC).then(async(gasPrice) => {
                 gasPrice = parseFloat((gasPrice * 2)).toFixed(4).toString();
                 await dataBridgeBNBToLinea(info.rpcBSC, amountETH, address).then(async(res) => {
@@ -371,7 +371,7 @@ const bridgeBUSDToLinea = async(privateKey) => {
 
     let isReady;
     while(!isReady) {
-        //APPROVE LP
+        //APPROVE BUSD
         console.log(chalk.yellow(`Approve BUSD for Celer Bridge`));
         logger.log(`Approve BUSD for Celer Bridge`);
         try {
@@ -526,32 +526,44 @@ const getBalanceWallet = async(privateKey) => {
 
     await getETHAmount(info.rpcArbitrum, address).then(async(res) => {
         console.log(chalk.magentaBright('Balance Arbitrum'));
-        console.log(`${res / 10**18}ETH`);
+        logger.log('Balance Arbitrum');
+        console.log(`${parseFloat(res / 10**18).toFixed(4)}ETH`);
+        logger.log(`${parseFloat(res / 10**18).toFixed(4)}ETH`);
     });
     await getETHAmount(info.rpcGoerli, address).then(async(res) => {
         console.log(chalk.magentaBright('Balance Goerli'));
-        console.log(`${res / 10**18}ETH`);
+        logger.log('Balance Goerli');
+        console.log(`${parseFloat(res / 10**18).toFixed(4)}ETH`);
+        logger.log(`${parseFloat(res / 10**18).toFixed(4)}ETH`);
         await getAmountToken(info.rpcGoerli, info.DAIGoerli, address).then(async(res1) => {
-            console.log(`${res1 / 10**18}DAI`);
+            console.log(`${parseFloat(res1 / 10**18).toFixed(2)}DAI`);
+            logger.log(`${parseFloat(res1 / 10**18).toFixed(2)}DAI`);
         });
         await getAmountToken(info.rpcGoerli, info.USDCGoerli, address).then(async(res1) => {
-            console.log(`${res1 / 10**6}USDC`);
+            console.log(`${parseFloat(res1 / 10**6).toFixed(2)}USDC`);
+            logger.log(`${parseFloat(res1 / 10**6).toFixed(2)}USDC`);
         });
         await getAmountToken(info.rpcGoerli, info.UNIGoerli, address).then(async(res1) => {
-            console.log(`${res1 / 10**18}UNI`);
+            console.log(`${parseFloat(res1 / 10**18).toFixed(2)}UNI`);
+            logger.log(`${parseFloat(res1 / 10**18).toFixed(2)}UNI`);
         });
         await getAmountToken(info.rpcGoerli, info.USDTGoerli, address).then(async(res1) => {
-            console.log(`${res1 / 10**6}USDT`);
+            console.log(`${parseFloat(res1 / 10**6).toFixed(2)}USDT`);
+            logger.log(`${parseFloat(res1 / 10**6).toFixed(2)}USDT`);
         });
         await getAmountToken(info.rpcGoerli, info.HOPGoerli, address).then(async(res1) => {
-            console.log(`${res1 / 10**18}HOP`);
+            console.log(`${parseFloat(res1 / 10**18).toFixed(2)}HOP`);
+            logger.log(`${parseFloat(res1 / 10**18).toFixed(2)}HOP`);
         });
     });
     await getETHAmount(info.rpcBSC, address).then(async(res) => {
         console.log(chalk.magentaBright('Balance BSC'));
-        console.log(`${res / 10**18}BNB`);
+        logger.log('Balance BSC');
+        console.log(`${parseFloat(res / 10**18).toFixed(4)}BNB`);
+        logger.log(`${parseFloat(res / 10**18).toFixed(4)}BNB`);
         await getAmountToken(info.rpcBSC, info.BUSDCeler, address).then(async(res1) => {
-            console.log(`${res1 / 10**18}BUSD`);
+            console.log(`${parseFloat(res1 / 10**18).toFixed(2)}BUSD`);
+            logger.log(`${parseFloat(res1 / 10**18).toFixed(2)}BUSD`);
         });
     });
 }
@@ -587,7 +599,7 @@ const getBalanceWalletLinea = async(privateKey) => {
 
 const galaxyVerifyCred = async(privateKey) => {
     const address = privateToAddress(privateKey);
-    const credArray = ['USDC', 'GETH', 'DAI', 'BUSD', 'BNB', 'UNI', 'USDT'];
+    const credArray = ['USDC', 'GETH', 'DAI', 'HOP', 'BUSD', 'BNB', 'UNI', 'USDT'];
 
     for (let i = 0; i < credArray.length; i++) {
         try {
