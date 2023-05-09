@@ -621,11 +621,11 @@ const galaxyVerifyCred = async(credArray, privateKey) => {
     }
 }
 
-const galaxyClaimPoints = async(privateKey) => {
+const galaxyClaimPoints = async(campaignID, privateKey) => {
     const address = privateToAddress(privateKey);
 
     try {
-        await claimPoints('GCd1YUZyrN', address).then((res) => {
+        await claimPoints(campaignID, address).then((res) => {
             if (res) {
                 console.log(chalk.green(`Claim Successful`));
                 logger.log(`Claim Successful`);
@@ -641,11 +641,11 @@ const galaxyClaimPoints = async(privateKey) => {
     }
 }
 
-const checkBalancePoints = async(privateKey) => {
+const checkBalancePoints = async(campaignID, privateKey) => {
     const address = privateToAddress(privateKey);
 
     try {
-        await balancePoints(address).then((res) => {
+        await balancePoints(campaignID, address).then((res) => {
             console.log(chalk.magentaBright(`${res} points`));
             logger.log(`${res} points`);
         });
@@ -742,8 +742,10 @@ const sendGoogleForm = async(proxy, privateKey) => {
     const galaxyStage = [
         'Verify WEEK 1',
         'Verify WEEK 2',
-        'Claim Points',
-        'Check Points Balance'
+        'Claim Points WEEK 1',
+        'Claim Points WEEK 2',
+        'Balance Points WEEK 1',
+        'Balance Points WEEK 2'
     ];
 
     const week2Stage = [
@@ -856,9 +858,13 @@ const sendGoogleForm = async(proxy, privateKey) => {
         } else if (index5 == 1) {
             await galaxyVerifyCred(['FORM', 'AMA', 'RETWEET'], wallet[i]);
         } else if (index5 == 2) {
-            await galaxyClaimPoints(wallet[i]);
+            await galaxyClaimPoints('GCd1YUZyrN', wallet[i]);
         } else if (index5 == 3) {
-            await checkBalancePoints(wallet[i]);
+            await galaxyClaimPoints('GCPRsUEZhR', wallet[i]);
+        } else if (index5 == 4) {
+            await checkBalancePoints('GCd1YUZyrN', wallet[i]);
+        } else if (index5 == 5) {
+            await checkBalancePoints('GCPRsUEZhR', wallet[i]);
         }
 
         if (index6 == 0) { //WEEK2 STAGE

@@ -45,11 +45,11 @@ export const claimPoints = async (campaignID, address) => {
     }
 }
 
-export const balancePoints = async (address) => {
+export const balancePoints = async (campaignID, address) => {
     const graphQLClient = new GraphQLClient('https://graphigo.prd.galaxy.eco/query');
     const query = gql`
         query {
-            campaign(id: "GCd1YUZyrN") {
+            campaign(id: "${campaignID}") {
                 numberID
                 name
                 numNFTMinted
