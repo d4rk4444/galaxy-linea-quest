@@ -45,11 +45,57 @@ export const claimPoints = async (campaignID, address) => {
     }
 }
 
+export const claimPoints2 = async (campaignID, address) => {
+    const graphQLClient = new GraphQLClient('https://graphigo.prd.galaxy.eco/query');
+    const query = gql`
+        mutation {
+            prepareParticipate(input: {
+                signature: ""
+                campaignID: "${campaignID}"
+                address: "${address}"
+                }) {
+                allow
+                disallowReason
+                mintFuncInfo {
+                    verifyIDs
+                    nftCoreAddress
+                }
+            }
+        }
+    `;
+    try {
+        await graphQLClient.request(query);
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+
 export const balancePoints = async (address) => {
     const graphQLClient = new GraphQLClient('https://graphigo.prd.galaxy.eco/query');
     const query = gql`
         query {
             campaign(id: "GCd1YUZyrN") {
+                numberID
+                name
+                numNFTMinted
+                startTime
+                endTime
+                claimedTimes(address: "${address}")
+                claimedLoyaltyPoints (address: "${address}")
+            }
+        }
+    `;
+
+    const result = await graphQLClient.request(query);
+    return result.campaign.claimedLoyaltyPoints;
+}
+
+export const balancePoints2 = async (address) => {
+    const graphQLClient = new GraphQLClient('https://graphigo.prd.galaxy.eco/query');
+    const query = gql`
+        query {
+            campaign(id: "GCPRsUEZhR") {
                 numberID
                 name
                 numNFTMinted
