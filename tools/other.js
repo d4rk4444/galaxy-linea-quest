@@ -44,6 +44,9 @@ export const info = {
     GalaxyCredGETH: '274939582723301376',
     GalaxyCredUNI: '275037291027275776',
     GalaxyCredUSDT: '274948110343118848',
+    GalaxyCredFORM: '278493989880635392',
+    GalaxyCredAMA: '278500236088483840',
+    GalaxyCredRETWEET: '278530352818593792',
     approveAmount: '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
 }
 
@@ -73,6 +76,12 @@ export const generateRandomAmount = (min, max, num) => {
 export const parseFile = (file) => {
     const data = fs.readFileSync(file, "utf-8");
     const array = (data.replace(/[^a-zA-Z0-9\n]/g,'')).split('\n');
+    return array;
+}
+
+export const parseProxy = (file) => {
+    const data = fs.readFileSync(file, "utf-8");
+    const array = (data.replace(/[^a-zA-Z0-9@:.\n]/g,'')).split('\n');
     return array;
 }
 

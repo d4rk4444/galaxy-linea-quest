@@ -3,7 +3,8 @@ import { info,
     shuffle,
     parseFile,
     generateRandomAmount,
-    privateToAddress } from './tools/other.js';
+    privateToAddress, 
+    parseProxy} from './tools/other.js';
 import { checkAllowance,
     getETHAmount,
     getAmountToken,
@@ -12,19 +13,20 @@ import { checkAllowance,
     dataSendToken,
     sendGoerliTX,    
     sendLineaTX,
-    sendEVMTX} from './tools/web3.js';
+    sendEVMTX } from './tools/web3.js';
 import { dataMintBUSD, dataMintDAI, dataMintHOP, dataMintUNI, dataMintUSDT } from './tools/mint.js';
 import { dataBridgeETHtoGoerli, dataBridgeETHtoLinea, dataBridgeTokentoLinea, dataBridgeZetaChainBSC } from './tools/bridge.js';
 import { dataSwapBNBToBUSD, dataSwapETHToUSDC } from './tools/DEX.js';
 import { dataBridgeBNBToLinea, dataBridgeBUSDToLinea } from './tools/celer.js';
 import { dataBridgeUSDTToLinea, dataBridgeUNIToLinea } from './tools/LiFi.js';
+import { balancePoints, claimPoints, verifyCred } from './tools/galaxy.js';
+import { testProxy, sendForm } from './tools/google.js';
 import { subtract, multiply, divide, add } from 'mathjs';
 import fs from 'fs';
 import readline from 'readline-sync';
 import consoleStamp from 'console-stamp';
 import chalk from 'chalk';
 import * as dotenv from 'dotenv';
-import { balancePoints, claimPoints, verifyCred } from './tools/galaxy.js';
 dotenv.config();
 
 const output = fs.createWriteStream(`history.log`, { flags: 'a' });
@@ -575,20 +577,20 @@ const getBalanceWalletLinea = async(privateKey) => {
         await timeout(5000);
         await getAmountToken(info.rpcLinea, info.USDCLinea, address).then(async(res1) => {
             console.log(chalk.magentaBright('Balance Linea'));
-            console.log(`${res / 10**18}ETH`);
-            console.log(`${res1 / 10**6}USDC`);
+            console.log(`${parseFloat(res / 10**18).toFixed(4)}ETH`);
+            console.log(`${parseFloat(res / 10**18).toFixed(2)}USDC`);
             await timeout(5000);
             await getAmountToken(info.rpcLinea, info.DAILinea, address).then(async(res2) => {
-                console.log(`${res2 / 10**18}DAI`);
+                console.log(`${parseFloat(res2 / 10**18).toFixed(2)}DAI`);
                 await timeout(5000);
                 await getAmountToken(info.rpcLinea, info.HOPLinea, address).then(async(res3) => {
-                    console.log(`${res3 / 10**18}HOP`);
+                    console.log(`${parseFloat(res3 / 10**18).toFixed(2)}HOP`);
                     await timeout(5000);
                     await getAmountToken(info.rpcLinea, info.BNBLinea, address).then(async(res4) => {
-                        console.log(`${res4 / 10**18}BNB`);
+                        console.log(`${parseFloat(res4 / 10**18).toFixed(2)}BNB`);
                         await timeout(5000);
                         await getAmountToken(info.rpcLinea, info.BUSDLinea, address).then(async(res5) => {
-                            console.log(`${res5 / 10**18}BUSD`);
+                            console.log(`${parseFloat(res5 / 10**18).toFixed(2)}BUSD`);
                         });
                     });
                 });
@@ -597,9 +599,8 @@ const getBalanceWalletLinea = async(privateKey) => {
     });
 }
 
-const galaxyVerifyCred = async(privateKey) => {
+const galaxyVerifyCred = async(credArray, privateKey) => {
     const address = privateToAddress(privateKey);
-    const credArray = ['USDC', 'GETH', 'DAI', 'HOP', 'BUSD', 'BNB', 'UNI', 'USDT'];
 
     for (let i = 0; i < credArray.length; i++) {
         try {
@@ -655,6 +656,48 @@ const checkBalancePoints = async(privateKey) => {
     }
 }
 
+const checkProxy = async(proxy) => {
+    try {
+        const host = (proxy.split('@')[1]).slice(0, -6);
+        await testProxy(proxy).then((res) => {
+            if (res) {
+                console.log(chalk.magentaBright(`Proxy Working ${host} ${res.country}/${res.city}`));
+                logger.log(`Proxy Working ${host} ${res.country}/${res.city}`);
+            } else if (!res) {
+                console.log(chalk.gray(`Proxy ${host} not working`));
+                logger.log(`Proxy ${host} not working`);
+            }
+        });
+    } catch (err) {
+        logger.log(err);
+        console.log(err.message);
+        return;
+    }
+}
+
+const sendGoogleForm = async(proxy, privateKey) => {
+    try {
+        const address = privateToAddress(privateKey);
+        const host = (proxy.split('@')[1]).slice(0, -6);
+        console.log(chalk.blue(`Proxy: ${host}`));
+        logger.log(`Proxy: ${host}`);
+
+        const answers = ['🌕', '🚀', '➰', '💆‍♀️', '✨', '〰️', '🌙', '🪄', '💫', '🏹', '🛼', '☎️', '🏁'];
+        const answer = generateRandomAmount(0, answers.length - 1, 0);
+
+        await sendForm(proxy, address, answers[answer]).then((res) => {
+            if (res == 200) {
+                console.log(chalk.magentaBright(`Form sent successfully. Answer: ${answers[answer]}`));
+                logger.log(`Form sent successfully. Answer: ${answers[answer]}`);
+            }
+        });
+    } catch (err) {
+        logger.log(err.message);
+        console.log(err.message);
+        return;
+    }
+}
+
 
 (async() => {
     const wallet = parseFile('private.txt');
@@ -664,6 +707,7 @@ const checkBalancePoints = async(privateKey) => {
         'CELER Bridge',
         'LiFi Bridge',
         'GALAXY',
+        'WEEK 2',
         'OTHER'
     ];
 
@@ -696,9 +740,15 @@ const checkBalancePoints = async(privateKey) => {
     ];
 
     const galaxyStage = [
-        'Verify Credentials',
+        'Verify WEEK 1',
+        'Verify WEEK 2',
         'Claim Points',
         'Check Points Balance'
+    ];
+
+    const week2Stage = [
+        'Test Proxy',
+        'Send Form'
     ];
 
     const otherStage = [
@@ -713,6 +763,7 @@ const checkBalancePoints = async(privateKey) => {
     let index4;
     let index5;
     let index6;
+    let index7;
     if (index == -1) { process.exit() };
     console.log(chalk.green(`Start ${mainStage[index]}`));
     logger.log(`Start ${mainStage[index]}`);
@@ -742,10 +793,15 @@ const checkBalancePoints = async(privateKey) => {
         console.log(chalk.green(`Start ${galaxyStage[index5]}`));
         logger.log(`Start ${galaxyStage[index5]}`);
     } else if (index == 5) {
-        index6 = readline.keyInSelect(otherStage, 'Choose stage!');
+        index6 = readline.keyInSelect(week2Stage, 'Choose stage!');
         if (index6 == -1) { process.exit() };
-        console.log(chalk.green(`Start ${otherStage[index6]}`));
-        logger.log(`Start ${otherStage[index6]}`);
+        console.log(chalk.green(`Start ${week2Stage[index6]}`));
+        logger.log(`Start ${week2Stage[index6]}`);
+    } else if (index == 6) {
+        index7 = readline.keyInSelect(otherStage, 'Choose stage!');
+        if (index7 == -1) { process.exit() };
+        console.log(chalk.green(`Start ${otherStage[index7]}`));
+        logger.log(`Start ${otherStage[index7]}`);
     }
     
     for (let i = 0; i < wallet.length; i++) {
@@ -796,17 +852,27 @@ const checkBalancePoints = async(privateKey) => {
         }
 
         if (index5 == 0) { //GALAXY STAGE
-            await galaxyVerifyCred(wallet[i]);
+            await galaxyVerifyCred(['USDC', 'GETH', 'DAI', 'HOP', 'BUSD', 'BNB', 'UNI', 'USDT'], wallet[i]);
         } else if (index5 == 1) {
-            await galaxyClaimPoints(wallet[i]);
+            await galaxyVerifyCred(['FORM', 'AMA', 'RETWEET'], wallet[i]);
         } else if (index5 == 2) {
+            await galaxyClaimPoints(wallet[i]);
+        } else if (index5 == 3) {
             await checkBalancePoints(wallet[i]);
         }
 
-        if (index6 == 0) { //OTHER STAGE
+        if (index6 == 0) { //WEEK2 STAGE
+            const proxyList = parseProxy('proxy.txt');
+            await checkProxy(proxyList[i]);
+        } else if (index6 == 1) {
+            const proxyList = parseProxy('proxy.txt');
+            await sendGoogleForm(proxyList[i], wallet[i]);
+        }
+
+        if (index7 == 0) { //OTHER STAGE
             pauseWalletTime = 0;
             await getBalanceWallet(wallet[i]);
-        } else if (index6 == 1) {
+        } else if (index7 == 1) {
             pauseWalletTime = 0;
             await getBalanceWalletLinea(wallet[i]);
         }
