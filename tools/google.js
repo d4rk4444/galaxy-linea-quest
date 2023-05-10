@@ -1,14 +1,13 @@
 import axios from 'axios-https-proxy-fix';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { userInfo } from 'os';
 import qs from 'querystring';
 
 export const testProxy = async(proxy) => {
     try {
         const url = 'http://ip-api.com/json';
-        const httpAgent = new HttpsProxyAgent(`http://${proxy}`);
+        const httpAgent = new HttpsProxyAgent(`https://${proxy}`);
         const response = await axios.get(url, {
-            httpAgent: httpAgent,
+            httpsAgent: httpAgent,
         });
         if (response.data.status == 'success') {
             const country = response.data.country;
