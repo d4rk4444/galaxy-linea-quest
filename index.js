@@ -750,7 +750,6 @@ const sendGoogleForm = async(proxy, privateKey) => {
 
     const week2Stage = [
         'Test Proxy',
-        'Send Form'
     ];
 
     const otherStage = [
@@ -870,9 +869,6 @@ const sendGoogleForm = async(proxy, privateKey) => {
         if (index6 == 0) { //WEEK2 STAGE
             const proxyList = parseProxy('proxy.txt');
             await checkProxy(proxyList[i]);
-        } else if (index6 == 1) {
-            const proxyList = parseProxy('proxy.txt');
-            await sendGoogleForm(proxyList[i], wallet[i]);
         }
 
         if (index7 == 0) { //OTHER STAGE
