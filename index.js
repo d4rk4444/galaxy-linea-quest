@@ -703,9 +703,9 @@ const sendGoogleForm = async(proxy, privateKey) => {
     const wallet = parseFile('private.txt');
     const mainStage = [
         'START',
-        'HOP Bridge',
-        'CELER Bridge',
-        'LiFi Bridge',
+        'HOP GOERLI Bridge',
+        'CELER BSC Bridge',
+        'LiFi GOERLI Bridge',
         'GALAXY',
         'WEEK 2',
         'OTHER'
@@ -733,11 +733,13 @@ const sendGoogleForm = async(proxy, privateKey) => {
         'Mint BUSD',
         'Bridge BNB -> Linea',
         'Bridge BUSD -> Linea',
+        'ALL IN ONE'
     ];
 
     const lifiStage = [
         'Bridge USDT -> Linea',
-        'Bridge UNI -> Linea'
+        'Bridge UNI -> Linea',
+        'ALL IN ONE'
     ];
 
     const galaxyStage = [
@@ -841,17 +843,16 @@ const sendGoogleForm = async(proxy, privateKey) => {
             const hopBridge = [mintDAI, mintHOP, mintUSDT, mintUNI, swapETHToUSDC];
             shuffle(hopBridge);
             for (let n = 0; n < hopBridge.length; n++) {
-                await hopBridge[n](wallet[i]);
                 await timeout(pauseTime);
+                await hopBridge[n](wallet[i]);
             }
             await bridgeETHToLinea(wallet[i]);
-            await timeout(pauseTime);
-            await bridgeTokenToLinea(info.DAIGoerli, wallet[i]);
-            await timeout(pauseTime);
-            await bridgeTokenToLinea(info.HOPGoerli, wallet[i]);
-            await timeout(pauseTime);
-            await bridgeTokenToLinea(info.USDCGoerli, wallet[i]);
-            await timeout(pauseTime);
+            const hopBridge2 = [info.DAIGoerli, info.HOPGoerli, info.USDCGoerli];
+            shuffle(hopBridge2);
+            for (let n = 0; n < hopBridge2.length; n++) {
+                await timeout(pauseTime);
+                await bridgeTokenToLinea(hopBridge2[n], wallet[i]);
+            }
         }
 
         if (index3 == 0) { //CELER STAGE
@@ -860,12 +861,27 @@ const sendGoogleForm = async(proxy, privateKey) => {
             await bridgeBNBToLinea(wallet[i]);
         } else if (index3 == 2) {
             await bridgeBUSDToLinea(wallet[i]);
+        } else if (index3 == 3) {
+            await mintBUSD(wallet[i]);
+            const celerBridge = [bridgeBNBToLinea, bridgeBUSDToLinea];
+            shuffle(celerBridge);
+            for (let n = 0; n < celerBridge.length; n++) {
+                await timeout(pauseTime);
+                await celerBridge[n](wallet[i]);
+            }
         }
 
         if (index4 == 0) { //LIFI STAGE
             await bridgeLiFiToLinea(info.USDTGoerli, wallet[i]);
         } else if (index4 == 1) {
             await bridgeLiFiToLinea(info.UNIGoerli, wallet[i]);
+        } else if (index4 == 2) {
+            const lifiBridge = [info.USDTGoerli, info.UNIGoerli];
+            shuffle(lifiBridge);
+            for (let n = 0; n < lifiBridge.length; n++) {
+                await timeout(pauseTime);
+                await bridgeLiFiToLinea(lifiBridge[n], wallet[i]);
+            }
         }
 
         if (index5 == 0) { //GALAXY STAGE
