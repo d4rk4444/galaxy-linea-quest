@@ -725,7 +725,8 @@ const sendGoogleForm = async(proxy, privateKey) => {
         'Bridge ETH to Linea',
         'Bridge DAI to Linea',
         'Bridge HOP to Linea',
-        'Bridge USDC to Linea'
+        'Bridge USDC to Linea',
+        'ALL IN ONE'
     ];
 
     const celerStage = [
@@ -836,6 +837,21 @@ const sendGoogleForm = async(proxy, privateKey) => {
             await bridgeTokenToLinea(info.HOPGoerli, wallet[i]);
         } else if (index2 == 8) {
             await bridgeTokenToLinea(info.USDCGoerli, wallet[i]);
+        } else if (index2 == 9) {
+            const hopBridge = [mintDAI, mintHOP, mintUSDT, mintUNI, swapETHToUSDC];
+            shuffle(hopBridge);
+            for (let n = 0; n < hopBridge.length; n++) {
+                await hopBridge[n](wallet[i]);
+                await timeout(pauseTime);
+            }
+            await bridgeETHToLinea(wallet[i]);
+            await timeout(pauseTime);
+            await bridgeTokenToLinea(info.DAIGoerli, wallet[i]);
+            await timeout(pauseTime);
+            await bridgeTokenToLinea(info.HOPGoerli, wallet[i]);
+            await timeout(pauseTime);
+            await bridgeTokenToLinea(info.USDCGoerli, wallet[i]);
+            await timeout(pauseTime);
         }
 
         if (index3 == 0) { //CELER STAGE
