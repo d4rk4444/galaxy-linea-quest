@@ -443,6 +443,7 @@ const bridgeLiFiToLinea = async(addressToken, privateKey) => {
                         logger.log(`Start Approve ${tokenName} for Li.Fi Bridge`);
                         await dataApprove(info.rpcGoerli, addressToken, info.bridgeLiFi, balance, address).then(async(res1) => {
                             await getGasPrice(info.rpcGoerli).then(async(gasPrice) => {
+                                if (Number(gasPrice) < 1) { gasPrice = '1.5'; }
                                 gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
                                 await sendEVMTX(info.rpcGoerli, 0, res1.estimateGas, addressToken, null, res1.encodeABI, privateKey, gasPrice);
                             });
