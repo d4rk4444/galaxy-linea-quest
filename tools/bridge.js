@@ -75,14 +75,14 @@ export const dataBridgeTokentoLinea = async(rpc, addressHopRouter, amount, addre
 export const dataBridgeZetaChainBSC = async(rpc, amount, addressTo) => {
     const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
     
-    const encodeABI = '0x71ec5c05'
-        + 'aa669c4922569c1d33f7a81aaa218138'
+    const encodeABI = '0x0f98b6e8'
+        + '47025e99d47eef751ab192621cf02dd0'
         + '00000000000000000000000013a0c5930c028511dc02665e7285134b6d11a5f4'
         + (w3.utils.padLeft(addressTo, 64)).slice(2)
         + '0000000000000000000000000000000000000000000000000000000000000000';
-    const estimateGas = await w3.eth.estimateGas({ data: encodeABI, value: amount });
+    //const estimateGas = await w3.eth.estimateGas({ data: encodeABI, value: amount });
 
-    return { encodeABI, estimateGas };
+    return { encodeABI };
 }
 
 export const dataBridgeZetaChainMATIC = async(rpc, amount, addressTo) => {

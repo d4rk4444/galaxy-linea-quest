@@ -326,7 +326,7 @@ const bridgeETHToBSC = async(privateKey) => {
                 gasPrice = parseFloat((gasPrice * 1.2)).toFixed(4).toString();
                 if (Number(gasPrice) <= needGasPrice) {
                     await dataBridgeZetaChainBSC(info.rpcGoerli, amountETH, address).then(async(res) => {
-                        await sendGoerliTX(info.rpcGoerli, parseInt(res.estimateGas*1.5), gasPrice, info.bridgeZetaChain, amountETH, res.encodeABI, privateKey);
+                        await sendGoerliTX(info.rpcGoerli, generateRandomAmount(60000, 80000, 0), gasPrice, info.bridgeZetaChain, amountETH, res.encodeABI, privateKey);
                         console.log(chalk.yellow(`Bridge ${amountETH / 10**18}ETH to BSC`));
                         logger.log(`Bridge ${amountETH / 10**18}ETH to BSC`);
                         isReady = true;
