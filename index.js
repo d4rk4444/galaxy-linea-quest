@@ -20,7 +20,6 @@ import { dataSwapBNBToBUSD, dataSwapETHToUSDC } from './tools/DEX.js';
 import { dataBridgeBNBToLinea, dataBridgeBUSDToLinea } from './tools/celer.js';
 import { dataBridgeUSDTToLinea, dataBridgeUNIToLinea } from './tools/LiFi.js';
 import { balancePoints, claimPoints, verifyCred } from './tools/galaxy.js';
-import { testProxy, sendForm } from './tools/google.js';
 import { subtract, multiply, divide, add } from 'mathjs';
 import fs from 'fs';
 import readline from 'readline-sync';
@@ -80,7 +79,7 @@ const mintDAI = async(privateKey) => {
                 await dataMintDAI(info.rpcGoerli, address).then(async(res) => {
                     await sendGoerliTX(info.rpcGoerli, res.estimateGas*2, gasPrice, info.DAIGoerli, res.valueMint, res.encodeABI, privateKey);
                     console.log(chalk.yellow(`Mint 100 DAI`));
-                    logger.log(`Mint 1000 DAI`);
+                    logger.log(`Mint 100 DAI`);
                     isReady = true;
                 });
             });
@@ -657,48 +656,6 @@ const checkBalancePoints = async(campaignID, privateKey) => {
     }
 }
 
-const checkProxy = async(proxy) => {
-    try {
-        const host = (proxy.split('@')[1]).slice(0, -6);
-        await testProxy(proxy).then((res) => {
-            if (res) {
-                console.log(chalk.magentaBright(`Proxy Working ${host} ${res.country}/${res.city}`));
-                logger.log(`Proxy Working ${host} ${res.country}/${res.city}`);
-            } else if (!res) {
-                console.log(chalk.gray(`Proxy ${host} not working`));
-                logger.log(`Proxy ${host} not working`);
-            }
-        });
-    } catch (err) {
-        logger.log(err);
-        console.log(err.message);
-        return;
-    }
-}
-
-const sendGoogleForm = async(proxy, privateKey) => {
-    try {
-        const address = privateToAddress(privateKey);
-        const host = (proxy.split('@')[1]).slice(0, -6);
-        console.log(chalk.blue(`Proxy: ${host}`));
-        logger.log(`Proxy: ${host}`);
-
-        const answers = ['🌕', '🚀', '➰', '💆‍♀️', '✨', '〰️', '🌙', '🪄', '💫', '🏹', '🛼', '☎️', '🏁'];
-        const answer = generateRandomAmount(0, answers.length - 1, 0);
-
-        await sendForm(proxy, address, answers[answer]).then((res) => {
-            if (res == 200) {
-                console.log(chalk.magentaBright(`Form sent successfully. Answer: ${answers[answer]}`));
-                logger.log(`Form sent successfully. Answer: ${answers[answer]}`);
-            }
-        });
-    } catch (err) {
-        logger.log(err.message);
-        console.log(err.message);
-        return;
-    }
-}
-
 
 (async() => {
     const wallet = parseFile('private.txt');
@@ -753,7 +710,7 @@ const sendGoogleForm = async(proxy, privateKey) => {
     ];
 
     const week2Stage = [
-        'Test Proxy',
+        'Empty'
     ];
 
     const otherStage = [
@@ -900,8 +857,7 @@ const sendGoogleForm = async(proxy, privateKey) => {
         }
 
         if (index6 == 0) { //WEEK2 STAGE
-            const proxyList = parseProxy('proxy.txt');
-            await checkProxy(proxyList[i]);
+
         }
 
         if (index7 == 0) { //OTHER STAGE

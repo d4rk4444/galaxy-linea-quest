@@ -1,5 +1,4 @@
 import Web3 from 'web3';
-import { ethers } from 'ethers';
 import { info } from './other.js';
 import { hopAbi, leyerAbi } from './abi.js';
 import { subtract, multiply, divide, add } from 'mathjs';
