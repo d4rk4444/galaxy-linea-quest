@@ -989,3 +989,21 @@ export const leyerAbi = [
         ],
     },
 ];
+
+export const thirdWeb = [
+    {
+        "type":"function",
+        "name":"getActiveClaimConditionId",
+        "inputs": [],
+        "outputs": [{"name":"","type":"uint256"}]
+    },
+    {
+        "type":"function",
+        "name":"deployProxyByImplementation",
+        "inputs": [
+            {"name":"","type":"address"},
+            {"name":"","type":"bytes"},
+            {"name":"","type":"bytes32"}
+        ]
+    },
+];

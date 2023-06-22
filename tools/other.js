@@ -106,6 +106,15 @@ export const info = {
     GalaxyCredYoutube: '284071740062736384',
     GalaxyCredRetweet: '284146897166966784',
     GalaxyCredSnapshot: '283604823812251648',
+    thirdWebTokenDrop: '0x76f948e5f13b9a84a81e5681df8682bbf524805e',
+    thirdWebQuest: '0x630900fB257fAfEf02491368062d50d6677d9D75',
+    hapiQuest: '0x1ed47146ba443D16F67f489800dc5d7786e07c5d',
+    GalaxyCredHapi: '285792379786141696',
+    GalaxyCredThirdwebDeploy: '285797002374717440',
+    GalaxyCredThirdwebClaimable: '285846209370431488',
+    GalaxyCredThirdwebClaim: '285846683930763264',
+    GalaxyCredThirdwebTransfer: '285847193668722688',
+    GalaxyCredGoPlus: '283122116019789824',
     approveAmount: '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
 }
 
@@ -147,4 +156,37 @@ export const parseProxy = (file) => {
 export const privateToAddress = (privateKey) => {
     const w3 = new Web3();
     return w3.eth.accounts.privateKeyToAccount(privateKey).address;
+}
+
+export const updateJsonFile = (address, collection, file) => {
+    fs.readFile(file, 'utf8', function readFileCallback(err, data){
+        if (err){
+            console.log("An error occurred while reading JSON Object from File.");
+            console.log(err);
+        } else {
+            const obj = JSON.parse(data);
+            obj[address] = collection;
+
+            const json = JSON.stringify(obj);
+
+            fs.writeFile(file, json, 'utf8', function (err) {
+                if (err) {
+                    console.log("An error occurred while writing JSON Object to File.");
+                    return console.log(err);
+                }
+                //console.log("JSON file has been updated.");
+            });
+        }
+    });
+}
+
+export const checkAddressInJson = (address, file) => {
+    const result = fs.readFileSync(file, 'utf8');
+
+    const obj = JSON.parse(result);
+    if (obj.hasOwnProperty(address)) {
+        return obj[address];
+    } else {
+        return false;
+    }
 }
