@@ -1,6 +1,39 @@
 import Web3 from 'web3';
 import { info } from './other.js';
 import { uniAbi } from './abi.js';
+import { subtract, multiply, divide, add } from 'mathjs';
+
+export const dataUnwrapETH = async(rpc, amountWETH, addressTo) => {
+    const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    const contract = new w3.eth.Contract(hopAbi, info.WETH);
+
+    const data = await contract.methods.withdraw(
+        amountWETH
+    );
+    
+    const encodeABI = data.encodeABI();
+    const estimateGas = await data.estimateGas({ from: addressTo });
+    return { encodeABI, estimateGas };
+}
+
+export const dataSwaphETHToWETH = async(rpc, amount, addressTo) => {
+    const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    const contract = new w3.eth.Contract(hopAbi, info.routerHop);
+
+    const amountMin = parseInt(multiply(amount, 0.1));
+
+    const data = await contract.methods.swap(
+        1,
+        0,
+        w3.utils.numberToHex(amount),
+        w3.utils.numberToHex(amountMin),
+        Date.now() + 5 * 60 * 1000
+    );
+    
+    const encodeABI = data.encodeABI();
+    const estimateGas = await data.estimateGas({ from: addressTo });
+    return { encodeABI, estimateGas };
+}
 
 export const dataSwapETHToUSDC = async(rpc, addressTo) => {
     const w3 = new Web3(new Web3.providers.HttpProvider(rpc));

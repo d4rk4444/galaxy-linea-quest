@@ -1,12 +1,30 @@
 import Web3 from 'web3';
 import fs from 'fs';
+import consoleStamp from 'console-stamp';
+import chalk from 'chalk';
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+export const log = (type, color, msg) => {
+    const output = fs.createWriteStream(`history.log`, { flags: 'a' });
+    const logger = new console.Console(output);
+    consoleStamp(console, { format: ':date(HH:MM:ss) :label' });
+    consoleStamp(logger, { format: ':date(yyyy/mm/dd HH:MM:ss) :label', stdout: output });
+
+    if (!color) {
+        console[type](msg);
+    } else {
+        console[type](chalk[color](msg));
+    }
+    logger[type](msg);
+}
 
 export const info = {
-    rpcArbitrum: 'https://1rpc.io/arb',
-    rpcGoerli: 'https://goerli.blockpi.network/v1/rpc/public',
-    rpcLinea: 'https://consensys-zkevm-goerli-prealpha.infura.io/v3/bc3a1c86920846adb87c3531ea958a8c',
-    rpcBSC: 'https://data-seed-prebsc-2-s2.binance.org:8545',
-    rpcPolygon: 'https://endpoints.omniatech.io/v1/matic/mumbai/public',
+    rpcArbitrum: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+    rpcGoerli: `https://goerli.infura.io/v3/${process.env.INFURA_API_KEY}`,
+    rpcLinea: `https://linea-goerli.infura.io/v3/${process.env.INFURA_API_KEY}`,
+    rpcBSC: 'https://rpc.ankr.com/bsc',
+    rpcPolygon: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
     explorerArbitrum: 'https://arbiscan.io/tx/',
     explorerGoerli: 'https://goerli.etherscan.io/tx/',
     explorerLinea: 'https://explorer.goerli.linea.build/tx/',
@@ -47,6 +65,47 @@ export const info = {
     GalaxyCredFORM: '278493989880635392',
     GalaxyCredAMA: '278500236088483840',
     GalaxyCredRETWEET: '278530352818593792',
+    routerL0Arb: '0x0A9f824C05A74F577A536A8A0c673183a872Dff4',
+    routerHop: '0x7191061D5d4C60f598214cC6913502184BAddf18',
+    bridgeHop: '0xd9e10C6b1bd26dE4E2749ce8aFe8Dd64294BcBF5',
+    bridgeLinea: '0xE87d317eB8dcc9afE24d9f63D6C760e52Bc18A40',
+    hETH: '0xA49600627D913B61714fF2a205Fb1096f1bceAb2',
+    WETH: '0x2C1b868d6596a18e32E61B901E4060C872647b6C',
+    ETHLinea: '0x0000000000000000000000000000000000000000',
+    USDCLinea: '0x636A7ee78faCd079DaBC8f81EDA1D09AA9D440A7',
+    DAILinea: '0x8741Ba6225A6BF91f9D73531A98A89807857a2B3',
+    HOPLinea: '0x6F03052743CD99ce1b29265E377e320CD24Eb632',
+    BNBLinea: '0x5471ea8f739dd37E9B81Be9c5c77754D8AA953E4',
+    BUSDLinea: '0x7d43AABC515C356145049227CeE54B608342c0ad',
+    nfts2me: '0x2269bCeB3f4e0AA53D2FC43B1B7C5C5D13B119a5',
+    bilinear: '0x3760f70722ddC05bFBfef23C739a3C801A97Aa2b',
+    bilinearMarket: '0x7d82f50bf95c04a2d95b64ce9b0c900db763bc1a',
+    bilinearBuyableNFT: '0xd2111EE8e74EA340133C7840Eaa80E7Cf48Fab2e',
+    lpsumLorem: '0x46717db664947a024990153fd8ff7411fef63d1a',
+    zeroMission: '0xe04F59B573Cb4093b3d596863c9F08aC89d44915',
+    ghostJohnMC: '0x91ba8A14D2CC851aBb69212c09f59e06e1e7f0a5',
+    ghostFreeNFT: '0x9C4c49C3c3bd7ab49D91576d0103A25514CaD1D6',
+    ghostCollection: '0x136E29d881DD91349d660B452aFb206e09C94268',
+    GalaxyCredNFTsCreate: '280709656117682176',
+    GalaxyCredNFTsToPublic: '280710520542765056',
+    GalaxyCredNFTsMint: '280711446271795200',
+    GalaxyCredNFTsAirDrop: '280711993813016576',
+    GalaxyCredNFTsGatedContent: '280712587818737664',
+    GalaxyCredGhostFree: '280715312526696448',
+    GalaxyCredGhostCreate: '280729315751665664',
+    GalaxyCredGhostCollateralNFT: '280730750916665344',
+    GalaxyCredGhostRedeemNFT: '280731501755801600',
+    GalaxyCredGhostCollateralColl: '280732009316917248',
+    GalaxyCredGhostRedeemColl: '280732468668702720',
+    GalaxyCredBilinearCreate: '280733387003174912',
+    GalaxyCredBilinearMint: '280734010784260096',
+    GalaxyCredBilinearBuy: '280734456991096832',
+    GalaxyCredBilinearSell: '280734981962768384',
+    GalaxyCredBilinearMintGame: '280735643010244608',
+    GalaxyCredZonicTransfer: '280738155352203264',
+    GalaxyCredYoutube: '284071740062736384',
+    GalaxyCredRetweet: '284146897166966784',
+    GalaxyCredSnapshot: '283604823812251648',
     approveAmount: '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
 }
 

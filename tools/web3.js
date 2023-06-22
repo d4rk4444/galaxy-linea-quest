@@ -10,6 +10,15 @@ export const getGasPrice = async(rpcProvider) => {
     return gasPriceInGwei;
 }
 
+export const getDecimal = async(rpc, tokenAddress) => {
+    const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    const token = new w3.eth.Contract(abiToken, w3.utils.toChecksumAddress(tokenAddress));
+
+    const data = await token.methods.decimals().call();
+
+    return data;
+}
+
 export const getETHAmount = async(rpc, walletAddress) => {
     const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
     const data = await w3.eth.getBalance(walletAddress);

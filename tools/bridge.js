@@ -3,6 +3,23 @@ import { info } from './other.js';
 import { hopAbi, leyerAbi } from './abi.js';
 import { subtract, multiply, divide, add } from 'mathjs';
 
+export const dataBridgeETHToLinea = async(rpc, amountETH, addressTo) => {
+    const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    const contract = new w3.eth.Contract(hopAbi, info.bridgeLinea);
+
+    const fee = w3.utils.toWei('0.01', 'ether');
+    const data = await contract.methods.dispatchMessage(
+        addressTo,
+        fee,
+        Date.now() + 24 * 60 * 60 * 1000,
+        '0x'
+    );
+    
+    const encodeABI = data.encodeABI();
+    const estimateGas = await data.estimateGas({ from: addressTo, value: amountETH });
+    return { encodeABI, estimateGas };
+}
+
 export const dataBridgeETHtoGoerli = async(rpc, amountETH, addressTo) => {
     const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
     const contract = new w3.eth.Contract(leyerAbi, info.routerL0Arb);

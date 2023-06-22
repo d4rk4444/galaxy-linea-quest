@@ -53,44 +53,7 @@ export const abiToken = [
             {"name":"amount","type":"uint256"}
         ]
     }
-]
-
-export const hopAbi = [
-    {
-        "type":"function",
-        "name":"sendToL2",
-        "inputs": [
-            {"name":"chainId","type":"uint256"},
-            {"name":"recipient","type":"address"},
-            {"name":"amount","type":"uint256"},
-            {"name":"amountOutMin","type":"uint256"},
-            {"name":"deadline","type":"uint256"},
-            {"name":"relayer","type":"address"},
-            {"name":"relayerFee","type":"uint256"},
-        ],
-    },
-    {
-        "type":"function",
-        "name":"deposit",
-        "inputs": [],
-    },
-    {
-        "type":"function",
-        "name":"withdraw",
-        "inputs": [{"name":"amount","type":"uint256"}],
-    },
-    {
-        "type":"function",
-        "name":"swap",
-        "inputs": [
-            {"name":"tokenIndexFrom","type":"uint8"},
-            {"name":"tokenIndexTo","type":"uint8"},
-            {"name":"dx","type":"uint256"},
-            {"name":"minDy","type":"uint256"},
-            {"name":"deadline","type":"uint256"},
-        ],
-    }
-]
+];
 
 export const uniAbi = [
     {
@@ -112,53 +75,7 @@ export const uniAbi = [
             {"name":"data","type":"bytes[]"}
         ],
     },
-]
-
-export const leyerAbi = [
-    {
-        "type":"function",
-        "name":"quoteLayerZeroFee",
-        "inputs": [
-            {"name":"_dstChainId","type":"uint16"},
-            {"name":"_functionType","type":"uint8"},
-            {"name":"_toAddress","type":"bytes"},
-            {"name":"_transferAndCallPayload","type":"bytes"},
-            {
-                "name":"_lzTxParams",
-                "type":"tuple",
-                "components": [{
-                    "name": "dstGasForCall",
-                    "type": "uint256"
-                },
-                {
-                    "name": "dstNativeAmount",
-                    "type": "uint256"
-                },
-                {
-                    "name": "dstNativeAddr",
-                    "type": "bytes"
-                }]
-            }
-        ],
-        "outputs": [
-            {"name":"nativeFee","type":"uint256"},
-            {"name":"zroFee","type":"uint256"}
-        ]
-    },
-    {
-        "type":"function",
-        "name":"swapAndBridge",
-        "inputs": [
-            {"name":"amountIn","type":"uint256"},
-            {"name":"amountOutMin","type":"uint256"},
-            {"name":"dstChainId","type":"uint16"},
-            {"name":"to","type":"address"},
-            {"name":"refundAddress","type":"address"},
-            {"name":"zroPaymentAddress","type":"address"},
-            {"name":"adapterParams","type":"bytes"},
-        ],
-    },
-]
+];
 
 export const celerAbi = [
     {
@@ -189,7 +106,7 @@ export const celerAbi = [
             {"name":"_nonce","type":"uint64"},
         ],
     },
-]
+];
 
 export const lifiABi = [
     {
@@ -892,5 +809,183 @@ export const lifiABi = [
         outputs: [],
         stateMutability: "payable",
         type: "function",
+    },
+];
+
+export const nfts2Abi = [
+    {
+        "type":"function",
+        "name":"setPhase",
+        "inputs": [
+            {"name":"type","type":"uint8"}
+        ],
+    }
+];
+
+export const bilinearAbi = [
+    {
+        "type":"function",
+        "name":"mint",
+        "inputs": [],
+    },
+    {
+        "type":"function",
+        "name":"buy",
+        "inputs": [
+            {"name":"","type":"address"},
+            {"name":"","type":"uint256"},
+            {"name":"","type":"uint256"},
+        ],
+    }
+];
+
+export const ghostAbi = [
+    {
+        "type":"function",
+        "name":"sendMeGhostNft",
+        "inputs": [
+            {"name":"","type":"address"},
+        ],
+    },
+    {
+        "type":"function",
+        "name":"collateralize",
+        "inputs": [
+            {"name":"","type":"uint256"},
+            {"name":"","type":"uint256[]"},
+            {"name":"","type":"address[]"},
+        ],
+    },
+    {
+        "type":"function",
+        "name":"uncollateralize",
+        "inputs": [
+            {"name":"","type":"uint256"},
+            {"name":"","type":"uint256[]"},
+            {"name":"","type":"address[]"},
+        ],
+    },
+    {
+        "type":"function",
+        "name":"registerCollection",
+        "inputs": [
+            {"name":"","type":"address"},
+            {"name":"","type":"address"},
+            {"name":"","type":"uint256"},
+            {"name":"","type":"uint256"},
+        ],
+    },
+    {
+        "type":"function",
+        "name":"collateralize",
+        "inputs": [
+            {"name":"","type":"address"},
+            {"name":"","type":"uint256"},
+            {"name":"","type":"uint256[]"},
+            {"name":"","type":"address[]"},
+        ],
+    },
+    {
+        "type":"function",
+        "name":"uncollateralize",
+        "inputs": [
+            {"name":"","type":"address"},
+            {"name":"","type":"uint256"},
+            {"name":"","type":"uint256[]"},
+            {"name":"","type":"address[]"},
+        ],
+    },
+];
+
+export const hopAbi = [
+    {
+        "type":"function",
+        "name":"sendToL2",
+        "inputs": [
+            {"name":"chainId","type":"uint256"},
+            {"name":"recipient","type":"address"},
+            {"name":"amount","type":"uint256"},
+            {"name":"amountOutMin","type":"uint256"},
+            {"name":"deadline","type":"uint256"},
+            {"name":"relayer","type":"address"},
+            {"name":"relayerFee","type":"uint256"},
+        ],
+    },
+    {
+        "type":"function",
+        "name":"deposit",
+        "inputs": [],
+    },
+    {
+        "type":"function",
+        "name":"withdraw",
+        "inputs": [{"name":"amount","type":"uint256"}],
+    },
+    {
+        "type":"function",
+        "name":"swap",
+        "inputs": [
+            {"name":"tokenIndexFrom","type":"uint8"},
+            {"name":"tokenIndexTo","type":"uint8"},
+            {"name":"dx","type":"uint256"},
+            {"name":"minDy","type":"uint256"},
+            {"name":"deadline","type":"uint256"},
+        ],
+    },
+    {
+        "type":"function",
+        "name":"dispatchMessage",
+        "inputs": [
+            {"name":"_to","type":"address"},
+            {"name":"_fee","type":"uint256"},
+            {"name":"_deadline","type":"uint256"},
+            {"name":"_calldata","type":"bytes"},
+        ],
+    },
+];
+
+export const leyerAbi = [
+    {
+        "type":"function",
+        "name":"quoteLayerZeroFee",
+        "inputs": [
+            {"name":"_dstChainId","type":"uint16"},
+            {"name":"_functionType","type":"uint8"},
+            {"name":"_toAddress","type":"bytes"},
+            {"name":"_transferAndCallPayload","type":"bytes"},
+            {
+                "name":"_lzTxParams",
+                "type":"tuple",
+                "components": [{
+                    "name": "dstGasForCall",
+                    "type": "uint256"
+                },
+                {
+                    "name": "dstNativeAmount",
+                    "type": "uint256"
+                },
+                {
+                    "name": "dstNativeAddr",
+                    "type": "bytes"
+                }]
+            }
+        ],
+        "outputs": [
+            {"name":"nativeFee","type":"uint256"},
+            {"name":"zroFee","type":"uint256"}
+        ]
+    },
+    {
+        "type":"function",
+        "name":"swapAndBridge",
+        "inputs": [
+            {"name":"amountIn","type":"uint256"},
+            {"name":"amountOutMin","type":"uint256"},
+            {"name":"dstChainId","type":"uint16"},
+            {"name":"to","type":"address"},
+            {"name":"refundAddress","type":"address"},
+            {"name":"zroPaymentAddress","type":"address"},
+            {"name":"adapterParams","type":"bytes"},
+        ],
     },
 ];
