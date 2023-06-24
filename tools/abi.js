@@ -1007,3 +1007,109 @@ export const thirdWeb = [
         ]
     },
 ];
+
+export const lineaster = [
+    {
+        "type":"function",
+        "name":"proxyCreateProfile",
+        "inputs": [
+            {
+                "name":"vars",
+                "type":"tuple",
+                "components": [
+                    {"name":"","type":"address"},
+                    {"name":"","type":"string"},
+                    {"name":"","type":"string"},
+                    {"name":"","type":"address"},
+                    {"name":"","type":"bytes"},
+                    {"name":"","type":"string"},
+                ]
+            }
+        ]
+    },
+];
+
+export const attic = [
+    {
+        "type":"function",
+        "name":"mint",
+        "inputs": [
+            {"name":"","type":"uint256"} 
+        ]
+    },
+];
+
+export const vitiDiary = [
+    {
+        "type":"function",
+        "name":"completeTutorial",
+        "inputs": []
+    },
+];
+
+export const battlemon = [
+    {
+        "type":"function",
+        "name":"mint",
+        "inputs": [
+            {"name":"","type":"address"} 
+        ]
+    },
+    {
+        "type":"function",
+        "name":"mint",
+        "inputs": [
+            {"name":"","type":"address"},
+            {"name":"","type":"uint256"}
+        ]
+    },
+    {
+        "type":"function",
+        "name":"merge",
+        "inputs": [
+            {"name":"","type":"uint256"},
+            {"name":"","type":"uint256"}
+        ]
+    },
+];
+
+export const moonlight = [
+    {
+        "type":"function",
+        "name":"mint",
+        "inputs": []
+    },
+];
+
+export const readon = [
+    {
+        "type":"function",
+        "name":"mintTo",
+        "inputs": [
+            {"name":"","type":"address"},
+            {"name":"","type":"string"}
+        ]
+    },
+];
+
+export const meet = [
+    {
+        "type":"function",
+        "name":"mintPublic",
+        "inputs": [
+            {"name":"","type":"uint64"},
+        ]
+    },
+];
+
+export const bridgeAbi = [
+    {
+        "type":"function",
+        "name":"sendMessage",
+        "inputs": [
+            {"name":"_to","type":"address"},
+            {"name":"_fee","type":"uint256"},
+            {"name":"_calldata","type":"bytes"}
+        ]
+    }
+];

@@ -3,17 +3,9 @@ import { info,
     shuffle,
     parseFile,
     generateRandomAmount,
-    privateToAddress, 
-    parseProxy } from './tools/other.js';
-import { checkAllowance,
-    getETHAmount,
-    getAmountToken,
-    dataApprove,
-    getGasPrice,
-    dataSendToken,
-    sendGoerliTX,    
-    sendLineaTX,
-    sendEVMTX } from './tools/web3.js';
+    privateToAddress } from './tools/other.js';
+import { getETHAmount,
+    getAmountToken } from './tools/web3.js';
 import { checkBalancePoints, galaxyClaimPoints, galaxyVerifyCred } from './functions/galaxy.js';
 import { bridgeBNBToLinea, bridgeBUSDToLinea, bridgeETHToBSC,
     bridgeETHToGoerli,
@@ -38,13 +30,19 @@ import { bilinearBuyNFT,
     ghostUncollateralOwnNFT,
     nftsMeChangeToPublic,
     nftsMeCreateCollection, nftsMeCreateEsitionCollection, zonicTransferNFT } from './functions/week3.js';
-import { subtract, multiply, divide, add } from 'mathjs';
+import { thirdCreateTokenDrop, thirdSecondStage } from './functions/week5.js';
+import { AtticMintNFT,
+    BattlemonQuest,
+    ENSMint,
+    Lineal2MintDomen,
+    LineasterCreateProfile,
+    MeetQuest,
+    MoonlightMintNFT, ReadonMint, StationXQuest, VerifyMoonlightNFT, VityDiaryQuest } from './functions/week7.js';
 import fs from 'fs';
 import readline from 'readline-sync';
 import consoleStamp from 'console-stamp';
 import chalk from 'chalk';
 import * as dotenv from 'dotenv';
-import { thirdCreateTokenDrop, thirdSecondStage } from './functions/week5.js';
 dotenv.config();
 
 const output = fs.createWriteStream(`history.log`, { flags: 'a' });
@@ -139,6 +137,7 @@ const getBalanceWalletLinea = async(privateKey) => {
         'LiFi GOERLI Bridge',
         'WEEK 3',
         'WEEK 5',
+        'WEEK 7',
         'GALAXY',
         'OTHER',
     ];
@@ -196,22 +195,39 @@ const getBalanceWalletLinea = async(privateKey) => {
         'Set to Pub/Mint/Send to Quest'
     ];
 
+    const week7Stage = [
+        'ENS Mint',
+        'Lineaster Create Profile',
+        'Lineal2 Mint Domen',
+        'Attic Mint NFT',
+        'Vity Diary Tutorial/Mint NFT',
+        'Battlemon',
+        'Mint Moonlight',
+        'Readon Mint',
+        'StationX',
+        'Meet',
+        'Verify Moonlight',
+    ];
+
     const galaxyStage = [
         'Verify WEEK 1',
         'Verify WEEK 2',
         'Verify WEEK 3',
         'Verify WEEK 4',
         'Verify WEEK 5',
+        'Verify WEEK 7',
         'Claim Points WEEK 1',
         'Claim Points WEEK 2',
         'Claim Points WEEK 3',
         'Claim Points WEEK 4',
         'Claim Points WEEK 5',
+        'Claim Points WEEK 7',
         'Balance Points WEEK 1',
         'Balance Points WEEK 2',
         'Balance Points WEEK 3',
         'Balance Points WEEK 4',
         'Balance Points WEEK 5',
+        'Balance Points WEEK 7',
     ];
 
     const otherStage = [
@@ -263,15 +279,20 @@ const getBalanceWalletLinea = async(privateKey) => {
         console.log(chalk.green(`Start ${week5Stage[index6]}`));
         logger.log(`Start ${week5Stage[index6]}`);
     } else if (index == 6) {
-        index7 = readline.keyInSelect(galaxyStage, 'Choose stage!');
+        index7 = readline.keyInSelect(week7Stage, 'Choose stage!');
         if (index7 == -1) { process.exit() };
-        console.log(chalk.green(`Start ${galaxyStage[index7]}`));
-        logger.log(`Start ${galaxyStage[index7]}`);
+        console.log(chalk.green(`Start ${week7Stage[index7]}`));
+        logger.log(`Start ${week7Stage[index7]}`);
     } else if (index == 7) {
-        index8 = readline.keyInSelect(otherStage, 'Choose stage!');
+        index8 = readline.keyInSelect(galaxyStage, 'Choose stage!');
         if (index8 == -1) { process.exit() };
-        console.log(chalk.green(`Start ${otherStage[index8]}`));
-        logger.log(`Start ${otherStage[index8]}`);
+        console.log(chalk.green(`Start ${galaxyStage[index8]}`));
+        logger.log(`Start ${galaxyStage[index8]}`);
+    } else if (index == 8) {
+        index9 = readline.keyInSelect(otherStage, 'Choose stage!');
+        if (index9 == -1) { process.exit() };
+        console.log(chalk.green(`Start ${otherStage[index9]}`));
+        logger.log(`Start ${otherStage[index9]}`);
     }
     
     for (let i = 0; i < wallet.length; i++) {
@@ -386,13 +407,37 @@ const getBalanceWalletLinea = async(privateKey) => {
             await thirdSecondStage(wallet[i]);
         }
 
-        if (index7 == 0) { //GALAXY STAGE //WEEK 1
+        if (index7 == 0) { //WEEK7 STAGE
+            await ENSMint(wallet[i]);
+        } else if (index7 == 1) {
+            await LineasterCreateProfile(wallet[i]);
+        } else if (index7 == 2) {
+            await Lineal2MintDomen(wallet[i]);
+        } else if (index7 == 3) {
+            await AtticMintNFT(wallet[i]);
+        } else if (index7 == 4) {
+            await VityDiaryQuest(wallet[i]);
+        } else if (index7 == 5) {
+            await BattlemonQuest(wallet[i]);
+        } else if (index7 == 6) {
+            await MoonlightMintNFT(wallet[i]);
+        } else if (index7 == 7) {
+            await ReadonMint(wallet[i]);
+        } else if (index7 == 8) {
+            await StationXQuest(wallet[i]);
+        } else if (index7 == 9) {
+            await MeetQuest(wallet[i]);
+        } else if (index7 == 10) {
+            await VerifyMoonlightNFT(wallet[i]);
+        }
+
+        if (index8 == 0) { //GALAXY STAGE //WEEK 1
             pauseWalletTime = 0;
             await galaxyVerifyCred(['USDC', 'GETH', 'DAI', 'HOP', 'BUSD', 'BNB', 'UNI', 'USDT'], wallet[i]);
-        } else if (index7 == 1) { //WEEK 2
+        } else if (index8 == 1) { //WEEK 2
             pauseWalletTime = 0;
             await galaxyVerifyCred(['FORM', 'AMA', 'RETWEET'], wallet[i]);
-        } else if (index7 == 2) { //WEEK 3
+        } else if (index8 == 2) { //WEEK 3
             pauseWalletTime = 0;
             await galaxyVerifyCred(['NFTsCreate',
                 'NFTsToPublic',
@@ -407,50 +452,71 @@ const getBalanceWalletLinea = async(privateKey) => {
                 'GhostRedeemColl',
                 'BilinearCreate',
                 'BilinearMint', 'BilinearBuy', 'BilinearSell', 'BilinearMintGame', 'ZonicTransfer'], wallet[i]);
-        } else if (index7 == 3) { //WEEK 4
+        } else if (index8 == 3) { //WEEK 4
             pauseWalletTime = 0;
             await galaxyVerifyCred(['Youtube', 'Retweet', 'Snapshot'], wallet[i]);
-        } else if (index7 == 4) { //WEEK 5
+        } else if (index8 == 4) { //WEEK 5
             pauseWalletTime = 0;
             await galaxyVerifyCred(['Hapi',
                 'ThirdwebDeploy',
                 'ThirdwebClaimable', 'ThirdwebClaim', 'ThirdwebTransfer', 'GoPlus'], wallet[i]);
-        } else if (index7 == 5) { //WEEK 1
+        } else if (index8 == 5) { //WEEK 7
+            pauseWalletTime = 0;
+            await galaxyVerifyCred(['ENS',
+                'LineasterProfile',
+                'LineaL2Domen',
+                'AtticEarly',
+                'AtticNFT',
+                'VitiDiaryTutorial',
+                'VitiDiaryNFT',
+                'BattlemonNFTGreen',
+                'BattlemonNFTPickaxe',
+                'BattlemonNFTGold',
+                'MoonlightNFT',
+                'ReadonDomen',
+                'StationXProject', 'StationXUSDC', 'StationXNFT', 'MeetNFT', 'MeetStake', 'MeetRedeem'], wallet[i]);
+        } else if (index8 == 6) { //WEEK 1
             pauseWalletTime = 0;
             await galaxyClaimPoints('GCd1YUZyrN', wallet[i]);
-        } else if (index7 == 6) { //WEEK 2
+        } else if (index8 == 7) { //WEEK 2
             pauseWalletTime = 0;
             await galaxyClaimPoints('GCPRsUEZhR', wallet[i]);
-        } else if (index7 == 7) { //WEEK 3
+        } else if (index8 == 8) { //WEEK 3
             pauseWalletTime = 0;
             await galaxyClaimPoints('GCEMnUEySZ', wallet[i]);
-        } else if (index7 == 8) { //WEEK 4
+        } else if (index8 == 9) { //WEEK 4
             pauseWalletTime = 0;
             await checkBalancePoints('GCEMnUEySZ', wallet[i]);
-        } else if (index7 == 9) { //WEEK 5
+        } else if (index8 == 10) { //WEEK 5
             pauseWalletTime = 0;
             await galaxyClaimPoints('GC8ofUNp65', wallet[i]);
-        } else if (index7 == 10) { //WEEK 1
+        } else if (index8 == 11) { //WEEK 7
+            pauseWalletTime = 0;
+            await galaxyClaimPoints('GCw91UQDkQ', wallet[i]);
+        } else if (index8 == 12) { //WEEK 1
             pauseWalletTime = 0;
             await checkBalancePoints('GCd1YUZyrN', wallet[i]);
-        } else if (index7 == 11) { //WEEK 2
+        } else if (index8 == 13) { //WEEK 2
             pauseWalletTime = 0;
             await checkBalancePoints('GCPRsUEZhR', wallet[i]);
-        } else if (index7 == 12) { //WEEK 3
+        } else if (index8 == 14) { //WEEK 3
             pauseWalletTime = 0;
             await galaxyClaimPoints('GC9kPUX6pP', wallet[i]);
-        } else if (index7 == 13) { //WEEK 4
+        } else if (index8 == 15) { //WEEK 4
             pauseWalletTime = 0;
             await checkBalancePoints('GC9kPUX6pP', wallet[i]);
-        } else if (index7 == 14) { //WEEK 5
+        } else if (index8 == 16) { //WEEK 5
             pauseWalletTime = 0;
             await checkBalancePoints('GC8ofUNp65', wallet[i]);
+        } else if (index8 == 17) { //WEEK 7
+            pauseWalletTime = 0;
+            await checkBalancePoints('GCw91UQDkQ', wallet[i]);
         }
 
-        if (index8 == 0) { //OTHER STAGE
+        if (index9 == 0) { //OTHER STAGE
             pauseWalletTime = 0;
             await getBalanceWallet(wallet[i]);
-        } else if (index8 == 1) {
+        } else if (index9 == 1) {
             pauseWalletTime = 0;
             await getBalanceWalletLinea(wallet[i]);
         }

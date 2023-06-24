@@ -36,6 +36,18 @@ export const getAmountToken = async(rpc, tokenAddress, walletAddress) => {
     return data;
 }
 
+export const getTokenId = async(rpc, addressNFT, walletAddress, index) => {
+    const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    const token = new w3.eth.Contract(abiToken, w3.utils.toChecksumAddress(addressNFT));
+
+    const data = await token.methods.tokenOfOwnerByIndex(
+        walletAddress,
+        index
+    ).call();
+
+    return data;
+}
+
 export const checkAllowance = async(rpc, tokenAddress, walletAddress, spender) => {
     const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
     const token = new w3.eth.Contract(abiToken, w3.utils.toChecksumAddress(tokenAddress));
@@ -62,6 +74,20 @@ export const dataApprove = async(rpc, tokenAddress, contractAddress, amountAprov
     return { encodeABI, estimateGas };
 }
 
+export const dataApproveNFT = async(rpc, nftAddress, operatorAddress, fromAddress) => {
+    const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    const contract = new w3.eth.Contract(abiToken, w3.utils.toChecksumAddress(nftAddress));
+
+    const data = await contract.methods.setApprovalForAll(
+        operatorAddress,
+        true,
+    );
+    const encodeABI = data.encodeABI();
+    const estimateGas = await data.estimateGas({ from: fromAddress });
+
+    return { encodeABI, estimateGas };
+}
+
 export const dataSendToken = async (rpc, tokenAddress, toAddress, amount, fromAddress) => {
     const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
     const contract = new w3.eth.Contract(abiToken, w3.utils.toChecksumAddress(tokenAddress));
@@ -74,6 +100,12 @@ export const dataSendToken = async (rpc, tokenAddress, toAddress, amount, fromAd
     const estimateGas = await data.estimateGas({ from: fromAddress });
 
     return { encodeABI, estimateGas };
+}
+
+export const getTxData = async(rpc, tx) => {
+    const w3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    const transaction = await w3.eth.getTransactionReceipt(tx);
+    return transaction.logs;
 }
 
 export const sendEVMTX = async(rpc, typeTx, gasLimit, toAddress, value, data, privateKey, maxFeeOrGasPrice, maxPriorityFee) => {
