@@ -6,7 +6,7 @@ import { info,
     privateToAddress } from './tools/other.js';
 import { getETHAmount,
     getAmountToken } from './tools/web3.js';
-import { checkBalancePoints, galaxyClaimPoints, galaxyVerifyCred } from './functions/galaxy.js';
+import { checkBalanceAllWeeksPoints, checkBalancePoints, galaxyClaimPoints, galaxyVerifyCred } from './functions/galaxy.js';
 import { bridgeBNBToLinea, bridgeBUSDToLinea, bridgeETHToBSC,
     bridgeETHToGoerli,
     bridgeETHToLinea,
@@ -228,6 +228,7 @@ const getBalanceWalletLinea = async(privateKey) => {
         'Balance Points WEEK 4',
         'Balance Points WEEK 5',
         'Balance Points WEEK 7',
+        'Balance Points All Week/Tier',
     ];
 
     const otherStage = [
@@ -511,6 +512,9 @@ const getBalanceWalletLinea = async(privateKey) => {
         } else if (index8 == 17) { //WEEK 7
             pauseWalletTime = 0;
             await checkBalancePoints('GCw91UQDkQ', wallet[i]);
+        } else if (index8 == 18) { //All Weeks
+            pauseWalletTime = 0;
+            await checkBalanceAllWeeksPoints(wallet[i]);
         }
 
         if (index9 == 0) { //OTHER STAGE

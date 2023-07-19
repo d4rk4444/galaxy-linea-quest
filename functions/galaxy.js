@@ -50,3 +50,25 @@ export const checkBalancePoints = async(campaignID, privateKey) => {
         return;
     }
 }
+
+export const checkBalanceAllWeeksPoints = async(privateKey) => {
+    const address = privateToAddress(privateKey);
+
+    try {
+        const arrCamp = ['GCd1YUZyrN', 'GCPRsUEZhR', 'GCEMnUEySZ', 'GC9kPUX6pP', 'GC8ofUNp65', 'GCcr5UNjtY', 'GCw91UQDkQ', 'GCfkeUSkbD', 'GCvpxUetXY', 'GCKurUN4yC'];
+        let amountPoints = 0;
+        for (let i = 0; i < arrCamp.length; i++) {
+            amountPoints = amountPoints + Number(await balancePoints(arrCamp[i], address));
+        }
+        const tier = amountPoints <= 2500 ? 5
+            : amountPoints > 2500 && amountPoints < 2740 ? 4
+            : amountPoints >= 2740 && amountPoints < 3050 ? 3
+            : amountPoints >= 3050 && amountPoints < 3400 ? 2
+            : 1;
+        log('log', 'yellow', `Balance Points: ${amountPoints}  Tier: ${tier}`);
+        return { balancePoints, tier };
+    } catch (err) {
+        log('error', 'red', err.message);
+        return;
+    }
+}
